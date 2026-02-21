@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pihakansi Rakenneanalyysi — As Oy Sato-Pasila</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Monte Carlo -simulaatiota ajetaan...</div>
+</div>
+
+<div class="app-layout">
+
+    <!-- ============================================================ -->
+    <!-- SIDEBAR — Parameter Controls                                  -->
+    <!-- ============================================================ -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-icon">&#x1F3D7;</div>
+                <div>
+                    <h1>Pihakansi</h1>
+                    <p>Rakenneanalyysi v1.0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+
+            <!-- Monte Carlo -->
+            <div class="accordion-header open">Monte Carlo</div>
+            <div class="accordion-content" style="max-height: 200px;">
+                <div class="param-group">
+                    <div class="param-row">
+                        <label>Iteraatiot</label>
+                        <input type="number" id="param-iterations" step="1000" min="100" max="50000">
+                        <span class="unit">kpl</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Bayes-ehdollistaminen</label>
+                        <input type="checkbox" id="param-bayesian-enabled" checked
+                               title="Ehdollistaa MC-näytteet 2024 kuntotutkimuksen havaintoihin">
+                        <span class="unit" style="font-size: 0.75em; color: var(--text-secondary);">2024 havainto</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Karbonatisaatio -->
+            <div class="accordion-header">Karbonatisaatio</div>
+            <div class="accordion-content">
+                <div class="param-group">
+                    <div class="param-row">
+                        <label>k (pilarit)</label>
+                        <input type="number" id="param-k-pilarit" step="0.01">
+                        <span class="unit">mm/&#8730;a</span>
+                    </div>
+                    <div class="param-row">
+                        <label>k (leukapalkit)</label>
+                        <input type="number" id="param-k-leukapalkit" step="0.01">
+                        <span class="unit">mm/&#8730;a</span>
+                    </div>
+                    <div class="param-row">
+                        <label>k (TT-laatat)</label>
+                        <input type="number" id="param-k-tt" step="0.01">
+                        <span class="unit">mm/&#8730;a</span>
+                    </div>
+                    <div class="param-row">
+                        <label>CoV</label>
+                        <input type="number" id="param-k-cov" step="0.01" min="0" max="1">
+                        <span class="unit"></span>
+                    </div>
+                    <div class="param-row">
+                        <label>Pintateräkset TT-ripa</label>
+                        <input type="number" id="param-surface-rebar-frac" step="0.01" min="0" max="0.5">
+                        <span class="unit">osuus</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Vaimennusikä t<sub>d</sub></label>
+                        <input type="number" id="param-dampening-age" step="1" min="0" max="100">
+                        <span class="unit">v</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Vaimennuskerroin &alpha;</label>
+                        <input type="number" id="param-dampening-factor" step="0.05" min="0" max="1">
+                        <span class="unit"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pakkasrapautuminen -->
+            <div class="accordion-header">Pakkasrapautuminen</div>
+            <div class="accordion-content">
+                <div class="param-group">
+                    <div class="param-row">
+                        <label>Perusnopeus</label>
+                        <input type="number" id="param-frost-rate" step="0.01">
+                        <span class="unit">mm/a</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Kiihtyvyys</label>
+                        <input type="number" id="param-frost-accel" step="0.001">
+                        <span class="unit">&times;/a</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Nopeus CoV</label>
+                        <input type="number" id="param-frost-rate-cov" step="0.01" min="0" max="1">
+                        <span class="unit"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tukipinta -->
+            <div class="accordion-header">Tukipinta (Eurokoodi 2)</div>
+            <div class="accordion-content">
+                <div class="param-group">
+                    <div class="param-row">
+                        <label>Alkuperäinen</label>
+                        <input type="number" id="param-bearing-original" step="1">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Kriittinen min.</label>
+                        <input type="number" id="param-bearing-critical" step="1">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Rapautumisnop.</label>
+                        <input type="number" id="param-bearing-rate" step="0.01">
+                        <span class="unit">mm/a</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Reunakerroin</label>
+                        <input type="number" id="param-bearing-edge-factor" step="0.1" min="1.0" max="2.0">
+                        <span class="unit">×</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Rapautum. CoV</label>
+                        <input type="number" id="param-bearing-cov" step="0.01" min="0" max="1">
+                        <span class="unit"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skenaario B: Pintaremontti -->
+            <div class="accordion-header">Skenaario B: Pintaremontti</div>
+            <div class="accordion-content">
+                <div class="param-group">
+                    <div class="param-row">
+                        <label>Pakkasvähenemä</label>
+                        <input type="number" id="param-light-frost-red" step="1" min="0" max="100">
+                        <span class="unit">%</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Kustannus (max)</label>
+                        <input type="number" id="param-light-cost" step="10">
+                        <span class="unit">t&euro;</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skenaario C: Täyskorjaus -->
+            <div class="accordion-header">Skenaario C: Täyskorjaus</div>
+            <div class="accordion-content">
+                <div class="param-group">
+                    <div class="param-row">
+                        <label>Pakkasvähenemä</label>
+                        <input type="number" id="param-full-frost-red" step="1" min="0" max="100">
+                        <span class="unit">%</span>
+                    </div>
+                    <div class="param-row">
+                        <label>k-vähenemä</label>
+                        <input type="number" id="param-full-k-red" step="1" min="0" max="100">
+                        <span class="unit">%</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Lisäkäyttöikä</label>
+                        <input type="number" id="param-full-life" step="1">
+                        <span class="unit">v</span>
+                    </div>
+                    <div class="param-row">
+                        <label>Kustannus</label>
+                        <input type="number" id="param-full-cost" step="1">
+                        <span class="unit">&euro;/m&sup2;</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="sidebar-actions">
+            <button id="btn-run-simulation" class="btn btn-primary">Aja simulaatio</button>
+            <button id="btn-generate-report" class="btn btn-report" disabled>Luo raportti</button>
+        </div>
+    </aside>
+
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT                                                  -->
+    <!-- ============================================================ -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="header">
+            <button id="sidebar-toggle" class="sidebar-toggle">&#9776;</button>
+            <div class="header-title">
+                <h2>As Oy Sato-Pasila &mdash; Pihakannen käyttöikäanalyysi</h2>
+                <p>Rakennettu 1974 &middot; TT-laatasto pilaripalkkirungolla &middot; 1 565 m&sup2;</p>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-danger">Vesieristys vuotanut 1975 &rarr;</span>
+                <span class="badge badge-warning">Korjaussuositus 2026</span>
+                <span class="badge badge-info">Monte Carlo N=10 000</span>
+            </div>
+        </header>
+
+        <!-- Tab Bar -->
+        <nav class="tab-bar">
+            <button class="tab-btn active" data-tab="intro">Esittely</button>
+            <button class="tab-btn" data-tab="overview">Yleiskatsaus</button>
+            <button class="tab-btn" data-tab="scenarios">Skenaariot</button>
+            <button class="tab-btn" data-tab="analyses">Analyysit</button>
+            <button class="tab-btn" data-tab="elements">Rakenneosakohtainen</button>
+            <button class="tab-btn" data-tab="data">Data</button>
+            <button class="tab-btn" data-tab="method">Menetelmä</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <div id="results-section">
+
+                <!-- ======================================== -->
+                <!-- TAB: Esittely (Intro)                     -->
+                <!-- ======================================== -->
+                <div id="tab-intro" class="tab-panel active">
+
+                    <div style="max-width: 800px; margin: 0 auto; padding: 20px 0;">
+
+                        <div style="text-align: center; margin-bottom: 32px;">
+                            <img src="sato-pasila.png" alt="As Oy Sato-Pasila pihakansi" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+                        </div>
+
+                        <h3 style="font-size: 1.5em; margin-bottom: 8px; color: #1e293b;">Pihakannen k&auml;ytt&ouml;ik&auml;analyysi</h3>
+                        <p style="font-size: 1.1em; color: #475569; line-height: 1.7; margin-bottom: 24px;">
+                            T&auml;m&auml; on <strong>laskennallinen ohjelmisto</strong>, joka mallintaa As&nbsp;Oy Sato-Pasilan
+                            pihakannen rakenteellista k&auml;ytt&ouml;ik&auml;&auml; Monte Carlo -simulaatiolla.
+                            Mallin parametrit on kalibroitu kahden kuntotutkimuksen (Vahanen&nbsp;2006, Contrust&nbsp;2024)
+                            mittaustuloksiin &mdash; kyseess&auml; on siis <strong>toteutuneen tilan mallintaminen</strong>,
+                            ei pelkk&auml; teoreettinen arvio.
+                        </p>
+                        <p style="font-size: 1.1em; color: #475569; line-height: 1.7; margin-bottom: 32px;">
+                            Ohjelmisto vertailee kolmea skenaariota: nykytilan jatkamista (A), pintaremonttia (B)
+                            ja t&auml;yskorjausta (C). Jokainen simulaatioajo tuottaa tuhansia laskentapolkuja,
+                            joista johdetaan todenn&auml;k&ouml;isyydet rakenteen vaurioitumiselle eri aikapisteiss&auml;.
+                        </p>
+
+                        <!-- Media links -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 36px;">
+
+                            <a href="https://youtu.be/J2lvWEOW35M" target="_blank" rel="noopener"
+                               style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: linear-gradient(135deg, #fef2f2, #fff1f2); border: 1px solid #fecdd3; border-radius: 10px; text-decoration: none; color: #1e293b; transition: transform 0.15s, box-shadow 0.15s;"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                               onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                <span style="font-size: 2em;">&#9654;&#65039;</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.95em;">Esittelyvideo</div>
+                                    <div style="font-size: 0.82em; color: #64748b;">Katso YouTube-video</div>
+                                </div>
+                            </a>
+
+                            <a href="https://youtu.be/UOSpwBEML5g" target="_blank" rel="noopener"
+                               style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1px solid #bbf7d0; border-radius: 10px; text-decoration: none; color: #1e293b; transition: transform 0.15s, box-shadow 0.15s;"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                               onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                <span style="font-size: 2em;">&#127911;</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.95em;">Podcast</div>
+                                    <div style="font-size: 0.82em; color: #64748b;">Kuuntele YouTube-podcast</div>
+                                </div>
+                            </a>
+
+                            <a href="https://drive.google.com/file/d/1JaMwXCbGNWkbux-v-sZingnneLNmXPE1/view?usp=sharing" target="_blank" rel="noopener"
+                               style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: linear-gradient(135deg, #eff6ff, #eef2ff); border: 1px solid #bfdbfe; border-radius: 10px; text-decoration: none; color: #1e293b; transition: transform 0.15s, box-shadow 0.15s;"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                               onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                <span style="font-size: 2em;">&#128196;</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.95em;">PDF-raportti</div>
+                                    <div style="font-size: 0.82em; color: #64748b;">~50 sivua, Google Drive</div>
+                                </div>
+                            </a>
+
+                        </div>
+
+                        <!-- How it works -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 24px; margin-bottom: 36px;">
+                            <h4 style="margin: 0 0 16px 0; color: #334155; font-size: 1.05em;">Miten ohjelmisto toimii?</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                <div>
+                                    <div style="font-size: 1.5em; margin-bottom: 4px;">&#128200;</div>
+                                    <div style="font-weight: 600; color: #334155; margin-bottom: 4px;">1. Simulaatio</div>
+                                    <div style="font-size: 0.88em; color: #64748b; line-height: 1.5;">
+                                        10&nbsp;000 Monte Carlo -iteraatiota mallintavat karbonatisaation,
+                                        pakkasrapautumisen ja tukipinnan kulumisen yhteisvaikutuksen.
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5em; margin-bottom: 4px;">&#128202;</div>
+                                    <div style="font-weight: 600; color: #334155; margin-bottom: 4px;">2. Tulokset</div>
+                                    <div style="font-size: 0.88em; color: #64748b; line-height: 1.5;">
+                                        Tulokset esitet&auml;&auml;n todenn&auml;k&ouml;isyysjakaumina: mediaanit,
+                                        luottamusv&auml;lit ja riskiprosentit eri aikapisteiss&auml;.
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5em; margin-bottom: 4px;">&#128209;</div>
+                                    <div style="font-weight: 600; color: #334155; margin-bottom: 4px;">3. Raportti</div>
+                                    <div style="font-size: 0.88em; color: #64748b; line-height: 1.5;">
+                                        Simulaation pohjalta voi generoida tulostettavan PDF-raportin,
+                                        joka sis&auml;lt&auml;&auml; kaaviot, taulukot ja l&auml;hdeviitteet.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CTA -->
+                        <div style="text-align: center; padding: 24px; background: linear-gradient(135deg, #eef2ff, #e0e7ff); border-radius: 10px; border: 1px solid #c7d2fe;">
+                            <p style="font-size: 1.05em; color: #3730a3; margin: 0 0 8px 0; font-weight: 600;">
+                                &#9888;&#65039; Simulaatio ajetaan automaattisesti sivun latautuessa.
+                            </p>
+                            <p style="font-size: 0.92em; color: #4338ca; margin: 0;">
+                                Voit muuttaa parametreja vasemman reunan paneelista ja ajaa simulaation
+                                uudelleen painamalla <strong>&rdquo;Aja simulaatio&rdquo;</strong> -nappia.
+                                Raportin voi generoida <strong>&rdquo;Luo raportti&rdquo;</strong> -napilla.
+                            </p>
+                        </div>
+
+                        <p style="text-align: center; font-size: 0.9em; color: #64748b; margin-top: 24px;">
+                            Kysymykset ja kommentit: <a href="mailto:longshoreforrest@gmail.com" style="color: #4338ca;">longshoreforrest@gmail.com</a>
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- ======================================== -->
+                <!-- TAB: Yleiskatsaus (Overview)              -->
+                <!-- ======================================== -->
+                <div id="tab-overview" class="tab-panel">
+
+                    <h3 class="section-title"><span class="icon">&#128202;</span> Skenaarioiden yhteenveto</h3>
+
+                    <!-- Scenario Summary Cards -->
+                    <div class="card-grid card-grid-3">
+
+                        <!-- Scenario A -->
+                        <div class="card card-scenario-a">
+                            <div class="card-header">
+                                <span class="card-title">EC2-raja <span class="tag tag-a">A</span></span>
+                            </div>
+                            <div class="card-value danger" id="scA-collapse-year">&mdash;</div>
+                            <div class="card-subtitle">Passiivinen (ei korjauksia)</div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Korroosion alku</span>
+                                    <span class="stat-value" id="scA-corrosion-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Kriitt. pakkasvaurio</span>
+                                    <span class="stat-value" id="scA-frost-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2035</span>
+                                    <span class="stat-value" id="scA-risk-2035">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2050</span>
+                                    <span class="stat-value" id="scA-risk-2050">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2075</span>
+                                    <span class="stat-value" id="scA-risk-2075">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2100</span>
+                                    <span class="stat-value" id="scA-risk-2100">&mdash;</span>
+                                </div>
+                            </div>
+                            <div class="card-stats no-border">
+                                <div class="stat-item full-width">
+                                    <span class="stat-label">90% luottamusv&auml;li</span>
+                                    <span class="stat-value" id="scA-conf-interval">&mdash;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scenario B -->
+                        <div class="card card-scenario-b">
+                            <div class="card-header">
+                                <span class="card-title">EC2-raja <span class="tag tag-b">B</span></span>
+                            </div>
+                            <div class="card-value warning" id="scB-collapse-year">&mdash;</div>
+                            <div class="card-subtitle">Pintaremontti 2026</div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Korroosion alku</span>
+                                    <span class="stat-value" id="scB-corrosion-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Kriitt. pakkasvaurio</span>
+                                    <span class="stat-value" id="scB-frost-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2035</span>
+                                    <span class="stat-value" id="scB-risk-2035">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2050</span>
+                                    <span class="stat-value" id="scB-risk-2050">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2075</span>
+                                    <span class="stat-value" id="scB-risk-2075">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2100</span>
+                                    <span class="stat-value" id="scB-risk-2100">&mdash;</span>
+                                </div>
+                            </div>
+                            <div class="card-stats no-border">
+                                <div class="stat-item full-width">
+                                    <span class="stat-label">90% luottamusv&auml;li</span>
+                                    <span class="stat-value" id="scB-conf-interval">&mdash;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scenario C -->
+                        <div class="card card-scenario-c">
+                            <div class="card-header">
+                                <span class="card-title">EC2-raja <span class="tag tag-c">C</span></span>
+                            </div>
+                            <div class="card-value success" id="scC-collapse-year">&mdash;</div>
+                            <div class="card-subtitle">T&auml;yskorjaus 2026</div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Korroosion alku</span>
+                                    <span class="stat-value" id="scC-corrosion-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Kriitt. pakkasvaurio</span>
+                                    <span class="stat-value" id="scC-frost-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2035</span>
+                                    <span class="stat-value" id="scC-risk-2035">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2050</span>
+                                    <span class="stat-value" id="scC-risk-2050">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2075</span>
+                                    <span class="stat-value" id="scC-risk-2075">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2100</span>
+                                    <span class="stat-value" id="scC-risk-2100">&mdash;</span>
+                                </div>
+                            </div>
+                            <div class="card-stats no-border">
+                                <div class="stat-item full-width">
+                                    <span class="stat-label">90% luottamusv&auml;li</span>
+                                    <span class="stat-value" id="scC-conf-interval">&mdash;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Overview Charts: Radar + Collapse Probability -->
+                    <h3 class="section-title"><span class="icon">&#128200;</span> Riskiprofiili</h3>
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-risk-collapse-prob2"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-risk-radar2"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ======================================== -->
+                <!-- TAB: Skenaariot (Scenarios)                -->
+                <!-- ======================================== -->
+                <div id="tab-scenarios" class="tab-panel">
+
+                    <h3 class="section-title"><span class="icon">&#128203;</span> Korjausskenaariot</h3>
+
+                    <div class="info-box">
+                        Simulaatio vertailee kolmea eri toimintavaihtoehtoa vuodesta 2026 eteenpäin. Kukin skenaario
+                        vaikuttaa eri tavoin pakkasrapautumiseen, karbonatisaatioon ja tukipinnan säilymiseen.
+                        Parametrit ovat säädettävissä sivupalkista.
+                    </div>
+
+                    <div class="info-box waiting-statement" id="waiting-statement">
+                        <span id="waiting-statement-text" style="line-height: 1.6;">Lasketaan...</span>
+                    </div>
+
+                    <!-- Scenario cards -->
+                    <div class="scenario-detail-grid">
+
+                        <!-- Scenario A -->
+                        <div class="scenario-detail-card scenario-a-card">
+                            <div class="scenario-detail-header scenario-a-header">
+                                <span class="scenario-letter">A</span>
+                                <div>
+                                    <h3>Passiivinen &mdash; ei toimenpiteitä</h3>
+                                    <p class="scenario-subtitle">Nykytilanne jatkuu sellaisenaan</p>
+                                </div>
+                            </div>
+
+                            <div class="scenario-detail-body">
+                                <h4>Kuvaus</h4>
+                                <p>
+                                    Taloyhtiö ei tee korjaustoimenpiteitä. Alkuperäinen kermieristys (bitumivedeneriste)
+                                    jatkaa vuotamistaan kuten vuodesta 1975 alkaen. Kaikki vauriomekanismit etenevät
+                                    häiriöttä nykyisellä nopeudella.
+                                </p>
+
+                                <h4>Toimenpiteet</h4>
+                                <ul>
+                                    <li>Ei vedeneristyksen korjausta</li>
+                                    <li>Ei betonipaikkausta</li>
+                                    <li>Ei pintakäsittelyä</li>
+                                    <li>Ei rakenteellisia korjauksia</li>
+                                </ul>
+
+                                <h4>Laskentamallin oletukset</h4>
+                                <table class="scenario-param-table">
+                                    <tr>
+                                        <td>Pakkasrapautuminen</td>
+                                        <td><span id="sc-a-frost-rate"></span> mm/a, lineaarinen (a = <span id="sc-a-frost-accel"></span>)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Karbonatisaatio k (TT)</td>
+                                        <td><span id="sc-a-k-tt"></span> mm/&radic;a (CoV <span id="sc-a-k-cov"></span>)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tukipinnan rapautuminen</td>
+                                        <td><span id="sc-a-bearing-rate"></span> mm/a, reunakerroin <span id="sc-a-edge-factor"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tukipinta alkuperäinen</td>
+                                        <td><span id="sc-a-bearing-orig"></span> mm (kriitt. <span id="sc-a-bearing-crit"></span> mm)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Betonipeite TT-ripa</td>
+                                        <td><span id="sc-a-cover-tt"></span> mm (std <span id="sc-a-cover-tt-std"></span> mm)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pintateräsosuus</td>
+                                        <td><span id="sc-a-surface-rebar"></span> %</td>
+                                    </tr>
+                                </table>
+
+                                <div class="scenario-cost">
+                                    <span class="scenario-cost-label">Kustannus</span>
+                                    <span class="scenario-cost-value">0 &euro;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scenario B -->
+                        <div class="scenario-detail-card scenario-b-card">
+                            <div class="scenario-detail-header scenario-b-header">
+                                <span class="scenario-letter">B</span>
+                                <div>
+                                    <h3>Pintaremontti</h3>
+                                    <p class="scenario-subtitle">Kevyt korjaus, piha-alueen kohennus v. 2026</p>
+                                </div>
+                            </div>
+
+                            <div class="scenario-detail-body">
+                                <h4>Kuvaus</h4>
+                                <p>
+                                    Tehdään vauriokohtien paikkakorjaus, vedeneristyksen paikkaus pahimmista vuotokohdista
+                                    ja piha-alueen kosmeettinen kohennus. Pihakannen suuret vaahterat säilytetään.
+                                    Toimenpide hidastaa vaurioitumista mutta ei pysäytä sitä täysin.
+                                </p>
+
+                                <h4>Toimenpiteet</h4>
+                                <ul>
+                                    <li>Vaurioituneiden betonipintojen paikkakorjaus</li>
+                                    <li>Vedeneristyksen paikkaus pahimmista vuotokohdista</li>
+                                    <li>Näkyvien korroosiovaurioiden korjaus</li>
+                                    <li>Pihakannen istutusten parannus ja kosmeettinen kohennus</li>
+                                    <li>Sadevesikaivojen puhdistus ja huolto</li>
+                                </ul>
+
+                                <h4>Vaikutukset laskentamalliin</h4>
+                                <table class="scenario-param-table">
+                                    <tr>
+                                        <td>Pakkasrapautuminen</td>
+                                        <td>Nopeus puolittuu (<span id="sc-b-frost-red"></span> % vähenemä)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Karbonatisaatio</td>
+                                        <td>Pysähtyy 5 vuodeksi (pinnoitteen vaikutus), jatkuu sen jälkeen</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tukipinnan rapautuminen</td>
+                                        <td>Nopeus puolittuu korjauksen jälkeen</td>
+                                    </tr>
+                                </table>
+
+                                <div class="scenario-cost">
+                                    <span class="scenario-cost-label">Kustannus</span>
+                                    <span class="scenario-cost-value"><span id="sc-b-cost"></span>&nbsp;000 &euro;<span id="sc-b-total-cost"></span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scenario C -->
+                        <div class="scenario-detail-card scenario-c-card">
+                            <div class="scenario-detail-header scenario-c-header">
+                                <span class="scenario-letter">C</span>
+                                <div>
+                                    <h3>Täyskorjaus</h3>
+                                    <p class="scenario-subtitle">Uusi vesieristys ja rakenteellinen korjaus v. 2026</p>
+                                </div>
+                            </div>
+
+                            <div class="scenario-detail-body">
+                                <h4>Kuvaus</h4>
+                                <p>
+                                    Tehdään rakenteen perusteellinen korjaus: uusi vesieristys, vaurioituneiden betonipintojen
+                                    kunnostus ja tarvittaessa rakenteellinen vahvistaminen. Toimenpide pysäyttää
+                                    pakkasrapautumisen lähes kokonaan ja pidentää rakenteen käyttöikää merkittävästi.
+                                    Tämä vastaa Contrust Oy:n 2024 raportissa esittämää korjausvaihtoehtoa.
+                                </p>
+
+                                <h4>Toimenpiteet</h4>
+                                <ul>
+                                    <li>Vanhan vedeneristyksen poisto ja uuden asennus</li>
+                                    <li>Vaurioituneiden betonipintojen perusteellinen korjaus</li>
+                                    <li>Korroosiovaurioiden ja paljastuneiden terästen korjaus</li>
+                                    <li>Rakenteellinen vahvistaminen tarvittaessa</li>
+                                    <li>Pintakuivatusjärjestelmän tarkistus / uusiminen</li>
+                                </ul>
+
+                                <h4>Vaikutukset laskentamalliin</h4>
+                                <table class="scenario-param-table">
+                                    <tr>
+                                        <td>Pakkasrapautuminen</td>
+                                        <td>Lähes pysähtyy (<span id="sc-c-frost-red"></span> % vähenemä)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Karbonatisaatio</td>
+                                        <td>k-kerroin laskee <span id="sc-c-k-red"></span> % (uusi suojabetoni)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tukipinnan rapautuminen</td>
+                                        <td>Nopeus vähenee 90 % (uusi vedeneristys suojaa)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Käyttöiän pidennys</td>
+                                        <td>+<span id="sc-c-life-ext"></span> vuotta korjauksesta</td>
+                                    </tr>
+                                </table>
+
+                                <div class="scenario-cost">
+                                    <span class="scenario-cost-label">Kustannus</span>
+                                    <span class="scenario-cost-value"><span id="sc-c-cost"></span> &euro;/m&sup2; &asymp; <span id="sc-c-total-cost"></span> &euro;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Comparison table -->
+                    <h3 class="section-title" style="margin-top: 2rem;"><span class="icon">&#128200;</span> Skenaarioiden vertailu</h3>
+
+                    <div class="data-table-wrapper">
+                        <table class="data-table scenario-comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Ominaisuus</th>
+                                    <th class="th-scenario-a">A &mdash; Passiivinen</th>
+                                    <th class="th-scenario-b">B &mdash; Pintaremontti</th>
+                                    <th class="th-scenario-c">C &mdash; Täyskorjaus</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Ajankohta</strong></td>
+                                    <td>&mdash;</td>
+                                    <td>2026</td>
+                                    <td>2026</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Vedeneristys</strong></td>
+                                    <td>Vuotaa (v. 1975 &rarr;)</td>
+                                    <td>Paikkaus pahimmista kohdista</td>
+                                    <td>Kokonaan uusi</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Betonikorjaukset</strong></td>
+                                    <td>Ei tehdä</td>
+                                    <td>Paikallinen paikkakorjaus</td>
+                                    <td>Perusteellinen kunnostus</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Pakkasrapaut. vähenemä</strong></td>
+                                    <td>0 %</td>
+                                    <td id="sc-comp-b-frost">&mdash;</td>
+                                    <td id="sc-comp-c-frost">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Karbonatisaatiovaikutus</strong></td>
+                                    <td>Ei muutosta</td>
+                                    <td>Tauko 5 v</td>
+                                    <td id="sc-comp-c-carb">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Käyttöiän pidennys</strong></td>
+                                    <td>&mdash;</td>
+                                    <td>Rajoitettu</td>
+                                    <td id="sc-comp-c-life">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Kustannus (&euro;/m&sup2;)</strong></td>
+                                    <td>0</td>
+                                    <td id="sc-comp-b-cost">&mdash;</td>
+                                    <td id="sc-comp-c-cost">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Kokonaiskustannus</strong></td>
+                                    <td>0 &euro;</td>
+                                    <td id="sc-comp-b-total">&mdash;</td>
+                                    <td id="sc-comp-c-total">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>EC2-raja alittuu 2035</strong></td>
+                                    <td id="sc-comp-a-risk2035">&mdash;</td>
+                                    <td id="sc-comp-b-risk2035">&mdash;</td>
+                                    <td id="sc-comp-c-risk2035">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>EC2-raja alittuu 2050</strong></td>
+                                    <td id="sc-comp-a-risk2050">&mdash;</td>
+                                    <td id="sc-comp-b-risk2050">&mdash;</td>
+                                    <td id="sc-comp-c-risk2050">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>EC2-raja alittuu 2075</strong></td>
+                                    <td id="sc-comp-a-risk2075">&mdash;</td>
+                                    <td id="sc-comp-b-risk2075">&mdash;</td>
+                                    <td id="sc-comp-c-risk2075">&mdash;</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>EC2-raja alittuu 2100</strong></td>
+                                    <td id="sc-comp-a-risk2100">&mdash;</td>
+                                    <td id="sc-comp-b-risk2100">&mdash;</td>
+                                    <td id="sc-comp-c-risk2100">&mdash;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 1.5rem;">
+                        <strong>Huomautus:</strong> Skenaario B:n &rdquo;rajoitettu käyttöiän pidennys&rdquo; tarkoittaa,
+                        että kevyt korjaus hidastaa vaurioitumista mutta ei pysäytä sitä &mdash; raskas korjaus
+                        tulee silti ajankohtaiseksi myöhemmin. Skenaario C vastaa Contrust Oy:n 2024 raportin
+                        arviota (~800 &euro;/m&sup2;, yhteensä ~1&nbsp;040&nbsp;000 &euro;).
+                    </div>
+
+                </div>
+
+                <!-- ======================================== -->
+                <!-- TAB: Analyysit (Analyses)                 -->
+                <!-- ======================================== -->
+                <div id="tab-analyses" class="tab-panel">
+
+                    <h3 class="section-title"><span class="icon">&#128300;</span> Vauriomekanismien analyysit</h3>
+
+                    <div class="info-box">
+                        <strong>Kolme skenaariota:</strong>
+                        A = Passiivinen (ei korjauksia),
+                        B = Pintaremontti 2026,
+                        C = Täyskorjaus 2026.
+                        Luottamusvyöhykkeet esittävät P5–P95-kvantiilivälin (10 000 Monte Carlo -iteraatiota).
+                    </div>
+
+                    <!-- Carbonation + Frost -->
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-carbonation"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-frost"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bearing + Collapse probability -->
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-bearing"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-collapse-prob"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Corrosion probability + Radar -->
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-corrosion-prob"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-container">
+                                <canvas id="chart-radar"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kuntotutkimus 2024: korroosion lähtötiedot -->
+                    <div class="info-box inspection" id="corrosion-inspection-box">
+                        <strong><a href="https://drive.google.com/file/d/1Ynu3_LPNEDh_npCL07y9s12zJwfI_T5-/view?usp=sharing" target="_blank" rel="noopener" style="color: inherit;">Kuntotutkimus 2024 (Contrust Oy) &#8599;</a> &mdash; korroosion l&auml;ht&ouml;tiedot:</strong><br>
+                        <table class="inspection-mini-table" style="margin-top: 8px; font-size: 0.8rem; border-collapse: collapse; width: 100%;">
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Havaittu korroosioaste</td>
+                                <td style="padding: 2px 8px;" id="corr-box-corrosion-rate">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Karbonatisaatiosyvyys (ohuthie)</td>
+                                <td style="padding: 2px 8px;" id="corr-box-carbonation">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Betonipeite</td>
+                                <td style="padding: 2px 8px;" id="corr-box-cover">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Kloridit</td>
+                                <td style="padding: 2px 8px;" id="corr-box-chlorides">&mdash;</td>
+                            </tr>
+                        </table>
+                        <div style="margin-top: 8px; font-style: italic; color: var(--accent-emerald);" id="corr-box-interpretation">
+                            Malli on konservatiivinen &mdash; havaittu korroosioaste on mallia pienempi.
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ======================================== -->
+                <!-- TAB: Rakenneosakohtainen (Elements)       -->
+                <!-- ======================================== -->
+                <div id="tab-elements" class="tab-panel">
+
+                    <h3 class="section-title"><span class="icon">&#127959;</span> Rakenneosakohtainen analyysi</h3>
+
+                    <div class="info-box">
+                        Histogrammit esittävät Monte Carlo -simulaation tulosten jakauman
+                        kullekin rakenneosalle erikseen. Kriittisimmät osat ovat TT-laatan ripa ja laippa,
+                        joissa betonipeitteet ovat ohuimmat.
+                    </div>
+
+                    <!-- Element Histogram + Collapse Histogram -->
+                    <div class="chart-grid">
+                        <div class="chart-card">
+                            <div class="chart-container tall">
+                                <canvas id="chart-element-histogram"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-container tall">
+                                <canvas id="chart-collapse-histogram"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kuntotutkimus 2024: rakenneosakohtaiset havainnot -->
+                    <div class="info-box inspection" id="element-inspection-box">
+                        <strong><a href="https://drive.google.com/file/d/1Ynu3_LPNEDh_npCL07y9s12zJwfI_T5-/view?usp=sharing" target="_blank" rel="noopener" style="color: inherit;">Kuntotutkimus 2024 (Contrust Oy) &#8599;</a> &mdash; korroosion l&auml;ht&ouml;tiedot:</strong><br>
+                        <table class="inspection-mini-table" style="margin-top: 8px; font-size: 0.8rem; border-collapse: collapse; width: 100%;">
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Havaittu korroosioaste</td>
+                                <td style="padding: 2px 8px;" id="elem-box-corrosion-rate">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Karbonatisaatiosyvyys (ohuthie)</td>
+                                <td style="padding: 2px 8px;" id="elem-box-carbonation">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Betonipeite</td>
+                                <td style="padding: 2px 8px;" id="elem-box-cover">&mdash;</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 8px 2px 0; color: var(--text-muted);">Kloridit</td>
+                                <td style="padding: 2px 8px;" id="elem-box-chlorides">&mdash;</td>
+                            </tr>
+                        </table>
+                        <div style="margin-top: 8px; font-style: italic; color: var(--accent-emerald);" id="elem-box-interpretation">
+                            Malli on konservatiivinen &mdash; havaittu korroosioaste on mallia pienempi.
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ======================================== -->
+                <!-- TAB: Data                                 -->
+                <!-- ======================================== -->
+                <div id="tab-data" class="tab-panel">
+
+                    <h3 class="section-title"><span class="icon">&#128218;</span> Mittaustiedot</h3>
+
+                    <!-- Inspection Data Cards -->
+                    <div class="inspection-grid">
+
+                        <!-- 2006 Inspection -->
+                        <div class="inspection-card">
+                            <h3><a href="https://drive.google.com/file/d/1jt7b_MVyD7v4312SzqtQErrDBKa6O2L8/view?usp=sharing" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">&#128196; Kuntotutkimus 2006 (Vahanen Oy) &#8599;</a></h3>
+                            <div class="inspection-row">
+                                <span class="label">Betonin suunnittelulujuus</span>
+                                <span class="value" id="data-2006-strength">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Karbonatisaatio pilarit (ka.)</span>
+                                <span class="value" id="data-2006-carb-pilarit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Karbonatisaatio leukapalkit (ka.)</span>
+                                <span class="value" id="data-2006-carb-leukapalkit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Karbonatisaatio TT-laatat (ka.)</span>
+                                <span class="value" id="data-2006-carb-tt">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Betonipeite pilarit (ka.)</span>
+                                <span class="value" id="data-2006-cover-pilarit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Betonipeite leukapalkit (ka.)</span>
+                                <span class="value" id="data-2006-cover-leukapalkit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Betonipeite TT-ripa alapinta (ka.)</span>
+                                <span class="value" id="data-2006-cover-tt">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">TT tukipinta leukapalkilla</span>
+                                <span class="value" id="data-2006-tukipinta">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Pakkasrapautuminen</span>
+                                <span class="value" id="data-2006-frost">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Pintateräkset (valmistusvirhe)</span>
+                                <span class="value" id="data-2006-pintaterakset">&mdash;</span>
+                            </div>
+                        </div>
+
+                        <!-- 2024 Inspection -->
+                        <div class="inspection-card">
+                            <h3><a href="https://drive.google.com/file/d/1Ynu3_LPNEDh_npCL07y9s12zJwfI_T5-/view?usp=sharing" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">&#128196; Kuntotutkimus 2024 (Contrust Oy) &#8599;</a></h3>
+                            <div class="inspection-row">
+                                <span class="label">Karbon. pilarit kenttä/ohuthie</span>
+                                <span class="value" id="data-2024-carb-pilarit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Karbon. TT-laippa kenttä/ohuthie</span>
+                                <span class="value" id="data-2024-carb-laippa">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Karbon. TT-ripa kenttä/ohuthie</span>
+                                <span class="value" id="data-2024-carb-ripa">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Betonipeite pilarit (ka.)</span>
+                                <span class="value" id="data-2024-cover-pilarit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Betonipeite TT-laippa (ka.)</span>
+                                <span class="value" id="data-2024-cover-laippa">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Betonipeite TT-ripa (ka.)</span>
+                                <span class="value" id="data-2024-cover-ripa">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Korroosioaste</span>
+                                <span class="value" id="data-2024-corrosion">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Vetolujuudet</span>
+                                <span class="value" id="data-2024-tensile">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Ohuthie: TT-laippa</span>
+                                <span class="value" id="data-2024-thin-laippa">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Ohuthie: TT-ripa</span>
+                                <span class="value" id="data-2024-thin-ripa">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Ohuthie: pilarit</span>
+                                <span class="value" id="data-2024-thin-pilarit">&mdash;</span>
+                            </div>
+                            <div class="inspection-row">
+                                <span class="label">Pintateräkset (valmistusvirhe)</span>
+                                <span class="value" id="data-2024-pintaterakset">&mdash;</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Results Data Table -->
+                    <h3 class="section-title"><span class="icon">&#128202;</span> Vuosikohtaiset tulokset</h3>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Vuosi</th>
+                                    <th colspan="3" class="th-scenario-a">Skenaario A</th>
+                                    <th colspan="3" class="th-scenario-b">Skenaario B</th>
+                                    <th colspan="3" class="th-scenario-c">Skenaario C</th>
+                                </tr>
+                                <tr>
+                                    <!-- A -->
+                                    <th class="th-scenario-a">Pakkas (mm)</th>
+                                    <th class="th-scenario-a">Tuki (mm)</th>
+                                    <th class="th-scenario-a">Sort. %</th>
+                                    <!-- B -->
+                                    <th class="th-scenario-b">Pakkas (mm)</th>
+                                    <th class="th-scenario-b">Tuki (mm)</th>
+                                    <th class="th-scenario-b">Sort. %</th>
+                                    <!-- C -->
+                                    <th class="th-scenario-c">Pakkas (mm)</th>
+                                    <th class="th-scenario-c">Tuki (mm)</th>
+                                    <th class="th-scenario-c">Sort. %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-table-body">
+                                <!-- Populated dynamically by app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- ======================================== -->
+                <!-- TAB: Menetelmä (Methodology)              -->
+                <!-- ======================================== -->
+                <div id="tab-method" class="tab-panel">
+
+                    <h3 class="section-title"><span class="icon">&#128218;</span> Laskentamenetelmät</h3>
+
+                    <div class="method-section">
+
+                        <div class="method-card">
+                            <h3>1. Karbonatisaatiomalli</h3>
+                            <p>
+                                Karbonatisaation etenemistä kuvataan neliöjuurimallilla, joka on betonirakenteissa
+                                yleisesti käytetty empiirinen malli. Karbonatisaatiokerroin <code>k</code> on
+                                kalibroitu vuoden 2024 ohuthieanalyysin tuloksista (t = 50 v),
+                                joka antaa luotettavamman arvion kosteuskyllästyneessä betonissa kuin
+                                kenttäfenolftaleiinikoe.
+                            </p>
+                            <p><strong>Kaksivaiheinen vaimennettu &radic;t -malli:</strong></p>
+                            <div class="formula-block">
+                                \[ x(t) = k \cdot \sqrt{t} \quad \text{kun } t \le t_d \]
+                                \[ x(t) = k\sqrt{t_d} + \alpha \cdot k \cdot \left(\sqrt{t} - \sqrt{t_d}\right) \quad \text{kun } t > t_d \]
+                            </div>
+                            <p>
+                                missä <code>x</code> = karbonatisaatiosyvyys (mm),
+                                <code>k</code> = karbonatisaatiokerroin (mm/&radic;a),
+                                <code>t</code> = aika rakentamisesta (a),
+                                <code>t<sub>d</sub></code> = vaimennusikä (a) ja
+                                <code>&alpha;</code> = vaimennuskerroin (0&ndash;1).
+                            </p>
+                            <p>
+                                <strong>Kosteuden vaikutus:</strong> CO&sub2;:n diffuusio vedellä kyllästetyissä
+                                huokosissa on jopa 10&nbsp;000 kertaa hitaampaa kuin kuivassa betonissa.
+                                Pitkäaikaismittaukset osoittavat, että kosteuskyllästeisessä ulkobetonissa
+                                karbonatisaatio hidastuu merkittävästi noin 30 vuoden jälkeen
+                                (Parrott 1987, fib Model Code 2010).
+                                Vaimennuskerroin &alpha;&nbsp;=&nbsp;0,3 vastaa RH&nbsp;&gt;&nbsp;90&nbsp;% olosuhteiden
+                                diffuusiovähenemää (Concrete Society TR&nbsp;61).
+                                Vuoden 2024 ohuthieanalyysistä kalibroitu k &asymp; 1,76 mm/&radic;a tuottaa
+                                12&nbsp;mm syvyyden t&nbsp;=&nbsp;50&nbsp;v, mikä vastaa mittauksia.
+                            </p>
+                            <p>
+                                Korroosio alkaa kun karbonatisaatiorintama saavuttaa raudoituksen.
+                                Kaksivaiheisessa mallissa aika ratkaistaan käänteisfunktiolla:
+                            </p>
+                            <div class="formula-block">
+                                \[ t_{\text{corr}} = t_d + \left(\frac{c - k\sqrt{t_d}}{k \cdot \alpha}\right)^2 \quad \text{kun } c > k\sqrt{t_d} \]
+                            </div>
+                            <p>
+                                missä <code>c</code> = betonipeite (mm). Monte Carlo -simulaatiossa
+                                <code>k</code> noudattaa log-normaalijakaumaa ja <code>c</code> normaalijakaumaa.
+                            </p>
+                        </div>
+
+                        <div class="method-card">
+                            <h3>2. Pakkasrapautumismalli (by 32 / by 68 / Vesikari 1988)</h3>
+                            <p>
+                                Oletuksena käytetään <strong>lineaarista mallia</strong>, jossa rapautumisnopeus on
+                                vakio (0,20 mm/a). Tämä perustuu kohdekohtaiseen kenttänäyttöön: K400-betoni on
+                                kestänyt 50 vuotta ilman toimivaa vedeneristystä ja on edelleen &rdquo;rapautumaton&rdquo;
+                                ja lujaa (vetolujuus ~2,0 MPa). Jos kiihtyvä takaisinkytkentä olisi merkittävä,
+                                50 vuodessa pitäisi nähdä enemmän tuhoa.
+                            </p>
+                            <div class="formula-block">
+                                \[ \Sigma(t) = r \cdot t \]
+                            </div>
+                            <p>
+                                missä <code>r</code> = perusnopeus (0,20 mm/a),
+                                <code>t</code> = altistusaika kriittisestä kyllästymisestä (v. 1975).
+                                Kriittinen vauriosyvyys on 30 mm.
+                                <strong>Kiihtyvyyskerroin</strong> (a) on säädettävissä sivupalkista:
+                                a &gt; 1,00 tuottaa konservatiivisemman arvion.
+                            </p>
+                            <p>
+                                Malli on kalibroitu kenttähavaintoihin: mediaani ~6 mm vuonna 2006, ~10 mm vuonna 2024.
+                                Vuoden 2006 pahin havainto (24 mm) vastaa äärimmäistä paikallista vesivuodon
+                                keskittymäkohtaa (&gt;P99). Suuri hajontakerroin (CoV = 45 %) kuvaa paikallista vaihtelua.
+                            </p>
+                        </div>
+
+                        <div class="method-card">
+                            <h3>3. Tukipinta-analyysi (Eurokoodi 2)</h3>
+                            <p>
+                                TT-laatan tukipinnan tehollinen pituus pienenee reunarapautumisen vuoksi.
+                                Huom: leukapalkin leuka on 150&nbsp;mm leveä, mutta
+                                TT-laatan todellinen tukipinta on vain ~100&nbsp;mm (2006 raportti).
+                                Sisäreuna on osittain suojattu laatan painosta, joten reunakerroin &lt; 2.0.
+                            </p>
+                            <div class="formula-block">
+                                \[ l_{\text{eff}}(t) = l_0 - n \cdot v \cdot t \]
+                            </div>
+                            <p>
+                                missä <code>l<sub>0</sub></code> = alkuperäinen tukipinta (100 mm),
+                                <code>n</code> = reunakerroin (oletus 1.5; sisäreuna suojattu),
+                                <code>v</code> = reunarapautumisen nopeus (mm/a),
+                                <code>t</code> = altistusaika.
+                                Eurokoodi 2:n mukainen minitukipinta on 75 mm.
+                            </p>
+                        </div>
+
+                        <div class="method-card">
+                            <h3>4. Monte Carlo -simulaatio</h3>
+                            <p>
+                                Simulaatio ajaa oletusarvoisesti 10 000 iteraatiota, joissa kunkin parametrin
+                                arvo poimitaan tilastollisesta jakaumasta:
+                            </p>
+                            <p>
+                                &bull; <strong>k-kertoimet:</strong> log-normaalijakauma (CoV &asymp; 30%)<br>
+                                &bull; <strong>Betonipeitteet:</strong> normaalijakauma<br>
+                                &bull; <strong>Pakkasrapautumisnopeus:</strong> log-normaalijakauma (CoV &asymp; 35%)<br>
+                                &bull; <strong>Reunarapautuminen:</strong> log-normaalijakauma (CoV &asymp; 40%)
+                            </p>
+                            <p>
+                                Tuloksista lasketaan mediaani, P5–P95-kvantiiliväli ja vuosikohtaiset
+                                korroosio- ja EC2-rajan alitustodennäköisyydet.
+                            </p>
+                        </div>
+
+                        <div class="method-card">
+                            <h3>5. Skenaariot</h3>
+                            <p>
+                                <strong>A &mdash; Passiivinen:</strong> Ei korjaustoimenpiteitä. Vauriot etenevät
+                                nykyisellä nopeudella.<br>
+                                <strong>B &mdash; Pintaremontti:</strong> Kevyt korjaus ja piha-alueen kohennus v. 2026.
+                                Pakkasrapautumisnopeus puolittuu, karbonatisaatio pysähtyy 5 vuodeksi. Vaahterat säilytetään.<br>
+                                <strong>C &mdash; Täyskorjaus:</strong> Uusi vesieristys ja rakenteellinen korjaus v. 2026.
+                                Pakkasrapautuminen lähes pysähtyy (95% vähenemä),
+                                karbonatisaatiokerroin laskee 70%.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div><!-- /results-section -->
+        </div><!-- /tab-content -->
+
+        <!-- Footer -->
+        <div class="footer-note">
+            Pihakansi Rakenneanalyysi v1.0 &mdash; As Oy Sato-Pasila &middot;
+            Monte Carlo -simulaatio &middot; Karbonatisaatio &middot; Pakkasrapautuminen &middot; Eurokoodi 2
+        </div>
+
+    </main>
+
+</div><!-- /app-layout -->
+
+<!-- CDN: Chart.js + Annotation Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+<!-- CDN: KaTeX -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<!-- Application Scripts -->
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script src="charts.js"></script>
+<script src="report.js"></script>
+<script src="app.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "\\[", right: "\\]", display: true},
+                {left: "\\(", right: "\\)", display: false}
+            ],
+            throwOnError: false
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+{
+  "A": {
+    "2030": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0227,
+      "frost_median": 10.08,
+      "bearing_median": 91.97
+    },
+    "2035": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.031,
+      "frost_median": 11,
+      "bearing_median": 91.24
+    },
+    "2040": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0409,
+      "frost_median": 11.91,
+      "bearing_median": 90.51
+    },
+    "2050": {
+      "collapse_prob": 0.0009,
+      "corrosion_prob": 0.0563,
+      "frost_median": 13.75,
+      "bearing_median": 89.05
+    },
+    "2075": {
+      "collapse_prob": 0.0145,
+      "corrosion_prob": 0.0941,
+      "frost_median": 18.33,
+      "bearing_median": 85.4
+    },
+    "2100": {
+      "collapse_prob": 0.097,
+      "corrosion_prob": 0.1303,
+      "frost_median": 22.91,
+      "bearing_median": 81.76
+    },
+    "distributions": {
+      "corrosion_year_median": 2068,
+      "collapse_year_median": 2109,
+      "critical_frost_year_median": 2092
+    }
+  },
+  "B": {
+    "2030": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0132,
+      "frost_median": 9.66,
+      "bearing_median": 92.32
+    },
+    "2035": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0209,
+      "frost_median": 10.12,
+      "bearing_median": 91.96
+    },
+    "2040": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.03,
+      "frost_median": 10.57,
+      "bearing_median": 91.59
+    },
+    "2050": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0475,
+      "frost_median": 11.48,
+      "bearing_median": 90.87
+    },
+    "2075": {
+      "collapse_prob": 0.0008,
+      "corrosion_prob": 0.0831,
+      "frost_median": 13.76,
+      "bearing_median": 89.06
+    },
+    "2100": {
+      "collapse_prob": 0.0038,
+      "corrosion_prob": 0.1211,
+      "frost_median": 16.04,
+      "bearing_median": 87.25
+    },
+    "distributions": {
+      "corrosion_year_median": 2072,
+      "collapse_year_median": 2113,
+      "critical_frost_year_median": 2094
+    }
+  },
+  "C": {
+    "2030": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0177,
+      "frost_median": 9.37,
+      "bearing_median": 92.57
+    },
+    "2035": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0197,
+      "frost_median": 9.42,
+      "bearing_median": 92.54
+    },
+    "2040": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0217,
+      "frost_median": 9.46,
+      "bearing_median": 92.5
+    },
+    "2050": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0258,
+      "frost_median": 9.55,
+      "bearing_median": 92.43
+    },
+    "2075": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0375,
+      "frost_median": 9.78,
+      "bearing_median": 92.25
+    },
+    "2100": {
+      "collapse_prob": 0,
+      "corrosion_prob": 0.0488,
+      "frost_median": 10.01,
+      "bearing_median": 92.07
+    },
+    "distributions": {
+      "corrosion_year_median": 2062,
+      "collapse_year_median": null,
+      "critical_frost_year_median": 2026
+    }
+  }
+}
