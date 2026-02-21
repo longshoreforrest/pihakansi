@@ -120,9 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     // Show results section
                     document.getElementById("results-section").classList.add("visible");
 
-                    // Enable report button
+                    // Enable report buttons
                     const rptBtn = document.getElementById("btn-generate-report");
                     if (rptBtn) rptBtn.disabled = false;
+                    const rptBtnIntro = document.getElementById("btn-generate-report-intro");
+                    if (rptBtnIntro) rptBtnIntro.disabled = false;
                 } catch (err) {
                     console.error("Simulation error:", err);
                     alert("Simulaatiovirhe: " + err.message);
@@ -637,6 +639,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportBtn = document.getElementById("btn-generate-report");
     if (reportBtn) {
         reportBtn.addEventListener("click", generateReport);
+    }
+
+    const reportBtnIntro = document.getElementById("btn-generate-report-intro");
+    if (reportBtnIntro) {
+        reportBtnIntro.addEventListener("click", generateReport);
     }
 
     const resetBtn = document.getElementById("btn-reset-params");
