@@ -493,11 +493,50 @@ document.addEventListener("DOMContentLoaded", () => {
     function initSidebar() {
         const toggle = document.getElementById("sidebar-toggle");
         const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("sidebar-overlay");
+
+        function isMobile() {
+            return window.matchMedia("(max-width: 900px)").matches;
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add("collapsed");
+            if (overlay) overlay.classList.remove("active");
+        }
+
+        function openSidebar() {
+            sidebar.classList.remove("collapsed");
+            if (isMobile() && overlay) overlay.classList.add("active");
+        }
+
+        // Start collapsed on mobile
+        if (isMobile() && sidebar) {
+            sidebar.classList.add("collapsed");
+        }
+
         if (toggle && sidebar) {
             toggle.addEventListener("click", () => {
-                sidebar.classList.toggle("collapsed");
+                if (sidebar.classList.contains("collapsed")) {
+                    openSidebar();
+                } else {
+                    closeSidebar();
+                }
             });
         }
+
+        // Close sidebar when clicking the overlay
+        if (overlay) {
+            overlay.addEventListener("click", closeSidebar);
+        }
+
+        // Auto-collapse sidebar when resizing to mobile
+        window.addEventListener("resize", () => {
+            if (isMobile()) {
+                closeSidebar();
+            } else {
+                if (overlay) overlay.classList.remove("active");
+            }
+        });
     }
 
     // ---- Parameter accordion ----

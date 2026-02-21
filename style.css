@@ -934,6 +934,27 @@ body::before {
   }
 }
 
+/* ---- Sidebar overlay backdrop (mobile) ---- */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 199;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
 @media (max-width: 900px) {
   .sidebar {
     position: fixed;
@@ -941,15 +962,87 @@ body::before {
     top: 0;
     z-index: 200;
     box-shadow: var(--shadow-lg);
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .sidebar.collapsed {
-    width: 0;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    transform: translateX(-100%);
+    overflow: hidden;
+    border-right: none;
   }
   .card-grid-3, .card-grid-2 {
     grid-template-columns: 1fr;
   }
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
   .inspection-grid {
     grid-template-columns: 1fr;
+  }
+  .header {
+    padding: 0 12px;
+    gap: 10px;
+  }
+  .header-title h2 {
+    font-size: 0.85rem;
+  }
+  .header-title p {
+    font-size: 0.65rem;
+  }
+  .header-badges {
+    display: none;
+  }
+  .tab-bar {
+    padding: 0 12px;
+  }
+  .tab-btn {
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+  .tab-content {
+    padding: 16px 12px;
+  }
+  .card-value {
+    font-size: 1.5rem;
+  }
+  .scenario-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+  .header-title h2 {
+    font-size: 0.8rem;
+  }
+  .tab-btn {
+    padding: 8px 10px;
+    font-size: 0.72rem;
+  }
+  .tab-content {
+    padding: 12px 8px;
+  }
+  .card {
+    padding: 14px;
+  }
+  .card-value {
+    font-size: 1.3rem;
+  }
+  .data-table {
+    font-size: 0.7rem;
+  }
+  .data-table th, .data-table td {
+    padding: 6px 8px;
+  }
+  .scenario-detail-header {
+    padding: 1rem;
+  }
+  .scenario-detail-body {
+    padding: 1rem;
   }
 }
 
