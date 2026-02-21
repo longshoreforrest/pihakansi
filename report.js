@@ -211,7 +211,9 @@ ${ReportGenerator._reportCSS()}
     </div>
     <p class="box-note" style="color:#92400e;">
         Pintaremontti hidastaa vaurioitumista ja kohentaa piha-alueen yleisilmettä.
-        Pihakannen vaahterat säilytetään.
+        Pihakannen vaahterat säilytetään. Samalla parannetaan autotallin estetiikkaa:
+        valaistusta kirkastetaan, betonipalkkeja harjataan ja maalataan valituilta osin,
+        seinäpintoja maalataan, ja tarvittaessa lisätään peltejä vesien ohjaamiseksi viemäriin.
         Kustannus: ${(params.light_repair.cost_total_min_eur / 1000).toFixed(0)}\u2013${(params.light_repair.cost_total_max_eur / 1000).toFixed(0)} t\u20ac.
     </p>
 </div>
@@ -2034,7 +2036,10 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         arvoon ${ReportGenerator._formatYear(collapseB)}
         ${!isNaN(collapseB.p5) && collapseB.n > 0 ? `(90 % luottamusväli: ${Math.round(collapseB.p5)}\u2013${Math.round(collapseB.p95)})` : ''}.
         Pintaremontti sisältää vesieristeen paikkauksen, vauriokohtien korjauksen ja piha-alueen
-        kosmeettisen kohennuksen. Pihakannen vaahterat säilytetään, ja yleisilme paranee merkittävästi.
+        kosmeettisen kohennuksen. Samalla parannetaan autotallin estetiikkaa: valaistusta kirkastetaan,
+        betonipalkkeja harjataan ja maalataan valituilta osin, seinäpintoja maalataan,
+        ja tarvittaessa lisätään peltejä vesien ohjaamiseksi viemäriin.
+        Pihakannen vaahterat säilytetään, ja yleisilme paranee merkittävästi.
         Betonin lujuusreservin huomioiva oikaistu arvio on ~${formatAdjusted(adjustedMedianB)}.
     </li>
     <li><strong>Täyskorjauksella (skenaario C)</strong> EC2-rajan alituksen mediaani on
