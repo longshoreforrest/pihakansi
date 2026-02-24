@@ -381,17 +381,17 @@ function calculateCO2Emissions(inputData) {
 
     // ---- Skenaario B: Pintaremontti ----
     const b_maali_seinat = 800;  // m² (seinäpinnat + palkit)
-    const b_bitumikermi_paikkaus = area * 0.2; // 20 % pinta-alasta paikataan
+    const b_betonilaatoitus_m2 = area * 0.3; // 30 % pinta-alasta vaihdetaan
     const b_teras_kg = 500;      // pienet korjaukset
-    const b_betoni_m3 = 5;       // paikkaus
+    const b_betoni_m3 = 8;       // paikkaus + laatoitustyöt
     const b_tyokoneet_kwh = 2000; // kevyt työmaa
 
     const b_maali = b_maali_seinat * CO2_FACTORS.maali.kerroin;
-    const b_kermi = b_bitumikermi_paikkaus * CO2_FACTORS.bitumikermi.kerroin;
+    const b_laatoitus = b_betonilaatoitus_m2 * CO2_FACTORS.betoni.kerroin * 0.05; // ohut laatta ~50 mm
     const b_ter = b_teras_kg * CO2_FACTORS.teras.kerroin;
     const b_bet = b_betoni_m3 * CO2_FACTORS.betoni.kerroin;
     const b_tyok = b_tyokoneet_kwh * CO2_FACTORS.tyokoneet.kerroin;
-    const b_rakentaminen = b_maali + b_kermi + b_ter + b_bet + b_tyok;
+    const b_rakentaminen = b_maali + b_laatoitus + b_ter + b_bet + b_tyok;
     const b_puusto_sidonta = puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet;
     const b_netto = b_rakentaminen - b_puusto_sidonta;
 
@@ -446,7 +446,7 @@ function calculateCO2Emissions(inputData) {
             erittely: [
                 { nimi: "Betonipaikkaus", kg: Math.round(b_bet) },
                 { nimi: "Teräskorjaukset", kg: Math.round(b_ter) },
-                { nimi: "Bitumikermi (paikkaus)", kg: Math.round(b_kermi) },
+                { nimi: "Betonilaatoitus (vaihto)", kg: Math.round(b_laatoitus) },
                 { nimi: "Maalaus", kg: Math.round(b_maali) },
                 { nimi: "Työkoneet", kg: Math.round(b_tyok) },
             ],

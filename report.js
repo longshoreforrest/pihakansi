@@ -2074,8 +2074,9 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     <li><strong>Pintaremontilla (skenaario B)</strong> EC2-rajan alituksen mediaani siirtyy
         arvoon ${ReportGenerator._formatYear(collapseB)}
         ${!isNaN(collapseB.p5) && collapseB.n > 0 ? `(90 % luottamusväli: ${Math.round(collapseB.p5)}\u2013${Math.round(collapseB.p95)})` : ''}.
-        Pintaremontti sisältää vesieristeen paikkauksen, vauriokohtien korjauksen ja piha-alueen
-        kosmeettisen kohennuksen. Samalla parannetaan autotallin estetiikkaa: valaistusta kirkastetaan,
+        Pintaremontti sisältää pintarakenteiden päivityksen (betonilaatoituksen vaihto, pintavesien
+        johtamisen parannus), vauriokohtien korjauksen ja piha-alueen kosmeettisen kohennuksen.
+        Samalla parannetaan autotallin estetiikkaa: valaistusta kirkastetaan,
         betonipalkkeja harjataan ja maalataan valituilta osin, seinäpintoja maalataan,
         ja tarvittaessa lisätään peltejä vesien ohjaamiseksi viemäriin.
         Pihakannen vaahterat säilytetään, ja yleisilme paranee merkittävästi.
