@@ -292,14 +292,19 @@ ${ReportGenerator._reportCSS()}
     <div class="toc-item sub"><span class="toc-num">7.6</span><span class="toc-text">Korroosion todennäköisyys</span></div>
     <div class="toc-item sub"><span class="toc-num">7.7</span><span class="toc-text">Rakenneosakohtainen analyysi</span></div>
     <div class="toc-item sub"><span class="toc-num">7.8</span><span class="toc-text">Skenaariovertailu</span></div>
-    <div class="toc-item"><span class="toc-num">8</span><span class="toc-text">Vuosikohtaiset tulokset</span></div>
-    <div class="toc-item"><span class="toc-num">9</span><span class="toc-text">Laskennan luotettavuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">9.1</span><span class="toc-text">Tieteellinen perusta ja kirjallisuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">9.2</span><span class="toc-text">Kalibrointi 50 vuoden kenttädataan</span></div>
-    <div class="toc-item sub"><span class="toc-num">9.3</span><span class="toc-text">Monte Carlo -simulaation luotettavuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">9.4</span><span class="toc-text">Rajoitukset ja epävarmuustekijät</span></div>
-    <div class="toc-item"><span class="toc-num">10</span><span class="toc-text">Johtopäätökset ja suositukset</span></div>
-    <div class="toc-item"><span class="toc-num">11</span><span class="toc-text">Lähdeluettelo</span></div>
+    <div class="toc-item"><span class="toc-num">8</span><span class="toc-text">Hiilijalanjälkianalyysi</span></div>
+    <div class="toc-item sub"><span class="toc-num">8.1</span><span class="toc-text">Päästökertoimet</span></div>
+    <div class="toc-item sub"><span class="toc-num">8.2</span><span class="toc-text">Skenaariokohtaiset päästöt</span></div>
+    <div class="toc-item sub"><span class="toc-num">8.3</span><span class="toc-text">Vertailu ja havainnollistaminen</span></div>
+    <div class="toc-item sub"><span class="toc-num">8.4</span><span class="toc-text">Puuston merkitys hiilitaseessa</span></div>
+    <div class="toc-item"><span class="toc-num">9</span><span class="toc-text">Vuosikohtaiset tulokset</span></div>
+    <div class="toc-item"><span class="toc-num">10</span><span class="toc-text">Laskennan luotettavuus</span></div>
+    <div class="toc-item sub"><span class="toc-num">10.1</span><span class="toc-text">Tieteellinen perusta ja kirjallisuus</span></div>
+    <div class="toc-item sub"><span class="toc-num">10.2</span><span class="toc-text">Kalibrointi 50 vuoden kenttädataan</span></div>
+    <div class="toc-item sub"><span class="toc-num">10.3</span><span class="toc-text">Monte Carlo -simulaation luotettavuus</span></div>
+    <div class="toc-item sub"><span class="toc-num">10.4</span><span class="toc-text">Rajoitukset ja epävarmuustekijät</span></div>
+    <div class="toc-item"><span class="toc-num">11</span><span class="toc-text">Johtopäätökset ja suositukset</span></div>
+    <div class="toc-item"><span class="toc-num">12</span><span class="toc-text">Lähdeluettelo</span></div>
 </div>
 
 <!-- ===== 1. JOHDANTO ===== -->
@@ -1396,9 +1401,15 @@ ${ReportGenerator._chartImage(chartImages, "chart-collapse-histogram", "Kuva 7. 
 </p>
 ${ReportGenerator._chartImage(chartImages, "chart-radar", "Kuva 8. Skenaarioiden vertailu (tutkadiagrammi)")}
 
-<!-- ===== 8. VUOSIKOHTAISET TULOKSET ===== -->
+<!-- ===== 8. HIILIJALANJÄLKIANALYYSI ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">8</span> Vuosikohtaiset tulokset</h2>
+<h2><span class="chapter-num">8</span> Hiilijalanjälkianalyysi</h2>
+
+${ReportGenerator._co2Chapter(inputData)}
+
+<!-- ===== 9. VUOSIKOHTAISET TULOKSET ===== -->
+<div class="page-break"></div>
+<h2><span class="chapter-num">9</span> Vuosikohtaiset tulokset</h2>
 <p>
     Taulukko esittää keskeisten tunnuslukujen mediaaniarvot valituilla tarkasteluvuosilla.
     Pakkasrapautuma (mm), tukipinnan tehollinen pituus (mm) ja EC2-rajan alitustodennäköisyys (%)
@@ -1412,9 +1423,9 @@ ${ReportGenerator._dataTable(results, params)}
 </p>
 ${ReportGenerator._carbonationTable(results, params)}
 
-<!-- ===== 9. LASKENNAN LUOTETTAVUUS ===== -->
+<!-- ===== 10. LASKENNAN LUOTETTAVUUS ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">9</span> Laskennan luotettavuus</h2>
+<h2><span class="chapter-num">10</span> Laskennan luotettavuus</h2>
 
 <p>
     Tämä osio arvioi laskentamallin luotettavuutta kolmesta näkökulmasta: tieteellinen perusta,
@@ -1422,7 +1433,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     Tavoitteena on antaa lukijalle edellytykset arvioida, kuinka paljon esitettyihin tuloksiin voi luottaa.
 </p>
 
-<h3><span class="chapter-num">9.1</span> Tieteellinen perusta ja kirjallisuus</h3>
+<h3><span class="chapter-num">10.1</span> Tieteellinen perusta ja kirjallisuus</h3>
 
 <p>
     Laskentamalli ei ole ad hoc -ratkaisu, vaan se perustuu rakennusalan vakiintuneisiin
@@ -1480,11 +1491,11 @@ ${ReportGenerator._carbonationTable(results, params)}
     Yhteenveto: laskentamalli koostuu vakiintuneista tieteellisistä osamalleista, joiden
     kukin komponentti on vertaisarvioitu ja laajasti käytetty rakennusalan suunnittelussa
     ja tutkimuksessa. Malli ei sisällä kokeellisia tai testaamattomia osia.
-    Viitelista (luku 11) kattaa 35 lähdettä, joista merkittävä osa on kansainvälisiä
+    Viitelista (luku 12) kattaa 35 lähdettä, joista merkittävä osa on kansainvälisiä
     standardeja, väitöskirjoja ja vertaisarvioituja tieteellisiä julkaisuja.
 </p>
 
-<h3><span class="chapter-num">9.2</span> Kalibrointi 50 vuoden kenttädataan</h3>
+<h3><span class="chapter-num">10.2</span> Kalibrointi 50 vuoden kenttädataan</h3>
 
 <p>
     Mallin luotettavuuden kannalta ratkaisevaa on, että se on sovitettu kohdekohtaiseen
@@ -1525,7 +1536,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     johdonmukaisesti.
 </p>
 
-<h3><span class="chapter-num">9.3</span> Monte Carlo -simulaation luotettavuus</h3>
+<h3><span class="chapter-num">10.3</span> Monte Carlo -simulaation luotettavuus</h3>
 
 <p>
     Monte Carlo -menetelmä on laajalti käytetty ja hyväksytty tapa käsitellä
@@ -1572,7 +1583,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     suosittelema menetelmä käyttöikäsuunnittelussa.
 </p>
 
-<h3><span class="chapter-num">9.4</span> Rajoitukset ja epävarmuustekijät</h3>
+<h3><span class="chapter-num">10.4</span> Rajoitukset ja epävarmuustekijät</h3>
 
 <p>
     Vaikka malli on kalibroitu kenttädataan ja perustuu vakiintuneisiin tieteellisiin
@@ -1608,15 +1619,15 @@ ${ReportGenerator._carbonationTable(results, params)}
     ja suuruusluokka-arvioina pitkän aikavälin päätöksenteolle.
 </p>
 
-<!-- ===== 10. JOHTOPÄÄTÖKSET JA SUOSITUKSET ===== -->
+<!-- ===== 11. JOHTOPÄÄTÖKSET JA SUOSITUKSET ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">10</span> Johtopäätökset ja suositukset</h2>
+<h2><span class="chapter-num">11</span> Johtopäätökset ja suositukset</h2>
 
 ${ReportGenerator._conclusions(results, params, inputData)}
 
-<!-- ===== 11. LÄHDELUETTELO ===== -->
+<!-- ===== 12. LÄHDELUETTELO ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">11</span> Lähdeluettelo</h2>
+<h2><span class="chapter-num">12</span> Lähdeluettelo</h2>
 
 <ol class="references">
     <li id="ref-1">
@@ -1776,6 +1787,33 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         <em>Pihakannen Hankesuunnitelma.</em>
         ${inputData.kohde_tiedot.nimi}. Helsinki.
         Saatavilla: <a href="https://drive.google.com/drive/folders/1VKEDKq8j-sIsNeOUsV21GFvSATutUvBq" class="url">Google Drive</a>.
+    </li>
+    <li id="ref-37">
+        CO2data.fi (2024). <em>Rakennusmateriaalien päästökertoimet.</em>
+        Suomen ympäristökeskus (Syke). Helsinki.
+        Saatavilla: <span class="url">co2data.fi</span>.
+    </li>
+    <li id="ref-38">
+        Hammond, G.P. & Jones, C.I. (2019). <em>Inventory of Carbon and Energy (ICE) Database, Version 3.0.</em>
+        University of Bath. Bath, UK.
+    </li>
+    <li id="ref-39">
+        Suomen ympäristökeskus (2023). <em>Rakentamisen ympäristövaikutukset.</em>
+        Syke raportteja. Helsinki.
+    </li>
+    <li id="ref-40">
+        Ilmasto.org (2024). <em>Lentoliikenteen päästöt.</em>
+        Saatavilla: <span class="url">ilmasto.org</span>.
+    </li>
+    <li id="ref-41">
+        Nowak, D.J., Stevens, J.C., Sisinni, S.M. & Luley, C.J. (2002).
+        "Effects of Urban Tree Management and Species Selection on Atmospheric Carbon Dioxide."
+        <em>Journal of Arboriculture</em>, 28(3), pp. 113–122.
+    </li>
+    <li id="ref-42">
+        McPherson, E.G. & Simpson, J.R. (1999).
+        "Carbon Dioxide Reduction Through Urban Forestry: Guidelines for Professional and Volunteer Tree Planters."
+        <em>USDA Forest Service General Technical Report PSW-GTR-171.</em> Albany, CA.
     </li>
 </ol>
 
@@ -2062,6 +2100,16 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     on toteutettavissa myös vaahterat säilyttäen.
 </p>
 
+<h3>Hiilijalanjälki</h3>
+<p>
+    Skenaarioiden ympäristövaikutukset eroavat merkittävästi (ks. luku 8):
+    passiivisen vaihtoehdon (A) nettovaikutus on negatiivinen (\u2212${Math.abs(calculateCO2Emissions(inputData).A.netto_t).toFixed(1)}\u00a0t CO\u2082,
+    puuston ansiosta), pintaremontin (B) nettopäästöt ovat ~${calculateCO2Emissions(inputData).B.netto_t}\u00a0t CO\u2082
+    ja täyskorjauksen (C) ~${calculateCO2Emissions(inputData).C.netto_t}\u00a0t CO\u2082.
+    Täyskorjauksen hiilijalanjälkeä kasvattaa merkittävästi pihakannen vaahtereiden kaataminen,
+    joka vapauttaa puiden hiilivaraston ja lopettaa vuotuisen hiilensidonnan [41, 42].
+</p>
+
 <h3>Johtopäätös korjaustarpeesta</h3>
 <p>
     Laskelmien perusteella <strong>massiivinen täyskorjaus
@@ -2135,6 +2183,143 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     asiantuntemuksen kanssa. Simulaation parametrit voidaan päivittää mahdollisten lisätutkimusten
     tulosten perusteella.
 </div>`;
+    }
+
+    // ---- CO2 Chapter content ----
+    static _co2Chapter(inputData) {
+        const co2 = calculateCO2Emissions(inputData);
+        const v = CO2_FACTORS.vertaukset;
+
+        function fmtKg(val) { return Math.abs(val).toLocaleString("fi-FI"); }
+
+        return `
+<p>
+    Tässä luvussa arvioidaan kunkin korjausskenaarion hiilijalanjälkeä. Laskelma kattaa
+    rakennusmateriaalien valmistuksen, kuljetuksen ja työmaan päästöt sekä pihakannen puuston
+    hiilensidonnan vaikutuksen 30 vuoden tarkastelujaksolla. Päästökertoimet perustuvat
+    julkisiin tietokantoihin [37, 38, 39, 40] ja puustotutkimuksiin [41, 42].
+</p>
+
+<h3><span class="chapter-num">8.1</span> Päästökertoimet</h3>
+<table class="data-table" style="margin: 12px 0;">
+    <thead>
+        <tr>
+            <th style="text-align:left;">Materiaali / toiminto</th>
+            <th>Päästökerroin</th>
+            <th>Yksikkö</th>
+            <th style="text-align:left;">Lähde</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td style="text-align:left;">Betoni (C32/40)</td><td>${CO2_FACTORS.betoni.kerroin}</td><td>kg CO\u2082e/m\u00b3</td><td style="text-align:left;">CO2data.fi; ICE v3.0 [37, 38]</td></tr>
+        <tr><td style="text-align:left;">Raudoitus (kierrätetty)</td><td>${CO2_FACTORS.teras.kerroin}</td><td>kg CO\u2082e/kg</td><td style="text-align:left;">ICE v3.0 [38]</td></tr>
+        <tr><td style="text-align:left;">Bitumikermi</td><td>${CO2_FACTORS.bitumikermi.kerroin}</td><td>kg CO\u2082e/m\u00b2</td><td style="text-align:left;">CO2data.fi; Syke [37, 39]</td></tr>
+        <tr><td style="text-align:left;">Maali (akrylaatti)</td><td>${CO2_FACTORS.maali.kerroin}</td><td>kg CO\u2082e/m\u00b2</td><td style="text-align:left;">ICE v3.0 [38]</td></tr>
+        <tr><td style="text-align:left;">Työkoneet (diesel)</td><td>${CO2_FACTORS.tyokoneet.kerroin}</td><td>kg CO\u2082e/kWh</td><td style="text-align:left;">CO2data.fi; Lipasto [37]</td></tr>
+        <tr><td style="text-align:left;">Purkujäte (kuljetus + käsittely)</td><td>${CO2_FACTORS.purkujate.kerroin}</td><td>kg CO\u2082e/t</td><td style="text-align:left;">Syke [39]</td></tr>
+        <tr><td style="text-align:left;">Iso vaahtera (hiilivarasto)</td><td>~${CO2_FACTORS.puusto.iso_vaahtera_hiilivarasto_kg}</td><td>kg C/puu</td><td style="text-align:left;">Nowak et al. 2002 [41]</td></tr>
+        <tr><td style="text-align:left;">Kaupunkipuu (vuotuinen sidonta)</td><td>~${CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2}</td><td>kg CO\u2082/puu/v</td><td style="text-align:left;">McPherson & Simpson 1999 [42]</td></tr>
+    </tbody>
+</table>
+
+<h3><span class="chapter-num">8.2</span> Skenaariokohtaiset päästöt</h3>
+
+<table class="data-table" style="margin: 12px 0;">
+    <thead>
+        <tr>
+            <th style="text-align:left;">Skenaario</th>
+            <th>Rakentaminen</th>
+            <th>Puusto (30 v)</th>
+            <th>Netto</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align:left;"><strong>A: Passiivinen</strong></td>
+            <td>0 t</td>
+            <td>\u2212${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} t (puut sitovat)</td>
+            <td><strong>${co2.A.netto_t} t</strong></td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>B: Pintaremontti</strong></td>
+            <td>~${(co2.B.rakentaminen_kg / 1000).toFixed(0)} t</td>
+            <td>\u2212${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} t (puut sitovat)</td>
+            <td><strong>~${co2.B.netto_t} t</strong></td>
+        </tr>
+        <tr>
+            <td style="text-align:left;"><strong>C: Täyskorjaus</strong></td>
+            <td>~${(co2.C.rakentaminen_kg / 1000).toFixed(0)} t</td>
+            <td>+${(co2.C.puusto_kg / 1000).toFixed(1)} t (hiili vapautuu)</td>
+            <td><strong>~${co2.C.netto_t} t</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Skenaario B:n erittely:</strong></p>
+<ul>
+${co2.B.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`).join('\n')}
+</ul>
+
+<p style="margin-top: 8px;"><strong>Skenaario C:n erittely:</strong></p>
+<ul>
+${co2.C.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`).join('\n')}
+</ul>
+
+<h3><span class="chapter-num">8.3</span> Vertailu ja havainnollistaminen</h3>
+<p>
+    Päästöjen suuruusluokkaa voi havainnollistaa arkipäiväisillä vertauksilla:
+</p>
+<table class="data-table" style="margin: 12px 0;">
+    <thead>
+        <tr>
+            <th style="text-align:left;">Vertailu</th>
+            <th>B: Pintaremontti</th>
+            <th>C: Täyskorjaus</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align:left;">Helsinki\u2013Pariisi-lentoja (~${v.lento_hki_pariisi_kg} kg CO\u2082e/lento) [40]</td>
+            <td>\u2248 ${co2.B.vertaukset.lennot_hki_pariisi} lentoa</td>
+            <td>\u2248 ${co2.C.vertaukset.lennot_hki_pariisi} lentoa</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;">Henkilöauton ajokilometrit (${v.auto_kg_per_km} kg/km) [37]</td>
+            <td>\u2248 ${(co2.B.vertaukset.autoilu_km / 1000).toFixed(0)}\u00a0000 km</td>
+            <td>\u2248 ${(co2.C.vertaukset.autoilu_km / 1000).toFixed(0)}\u00a0000 km</td>
+        </tr>
+        <tr>
+            <td style="text-align:left;">Keskivertosuomalaisen autoiluvuosia (~${v.suomalainen_autoilu_kg_per_v} kg/v)</td>
+            <td>\u2248 ${co2.B.vertaukset.autoilu_vuodet} v</td>
+            <td>\u2248 ${co2.C.vertaukset.autoilu_vuodet} v</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3><span class="chapter-num">8.4</span> Puuston merkitys hiilitaseessa</h3>
+<p>
+    Pihakannen kaksi suurta vaahterat ovat Itä-Pasilan suurimmat puut ja noin kuusikerroksisen
+    kerrostalon korkuiset. Kukin puu varastoi arviolta noin ${CO2_FACTORS.puusto.iso_vaahtera_hiilivarasto_kg} kg hiiltä
+    biomassaansa, mikä vastaa noin ${(CO2_FACTORS.puusto.iso_vaahtera_hiilivarasto_kg * 44 / 12 / 1000).toFixed(1)} tonnia
+    CO\u2082:ta [41]. Lisäksi puut sitovat vuosittain yhteensä noin
+    ${CO2_FACTORS.puusto.puita_kpl * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2} kg CO\u2082:ta [42].
+</p>
+<p>
+    Skenaariossa A ja B vaahterat säilytetään, jolloin ne jatkavat hiilensidontataan koko
+    elinaikansa. 30 vuodessa puiden nettosidonta on yhteensä noin ${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} tonnia CO\u2082:ta.
+</p>
+<p>
+    Skenaariossa C hankesuunnitelman mukaan vaahterat kaadetaan. Tällöin puiden hiilivarasto
+    (~${(co2.puusto_30v.hiilivarasto_kg / 1000).toFixed(1)} t CO\u2082) vapautuu ilmakehään ja vuotuinen sidonta menetetään.
+    Puuston kokonaisvaikutus skenaariossa C on noin +${(co2.C.puusto_kg / 1000).toFixed(1)} tonnia CO\u2082:ta
+    30 vuoden tarkastelujaksolla. Tämä vastaa yksinään noin ${Math.round(co2.C.puusto_kg / v.lento_hki_pariisi_kg)}
+    Helsinki\u2013Pariisi-lentoa.
+</p>
+<p>
+    Vaahtereiden säilyttäminen on siten paitsi viihtyisyyskysymys myös merkittävä
+    ilmastoteko kaupunkiympäristössä [41, 42].
+</p>
+`;
     }
 
     // ---- Report CSS ----

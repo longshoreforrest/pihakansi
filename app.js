@@ -394,6 +394,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setVal("sc-comp-b-total", (p.light_repair.cost_eur_per_m2 * area).toLocaleString("fi-FI") + " \u20ac");
         setVal("sc-comp-c-total", (p.full_repair.cost_eur_per_m2 * area).toLocaleString("fi-FI") + " \u20ac");
 
+        // CO2 section (deterministic, not dependent on simulation)
+        updateCO2Section();
+
         // Comparison table dynamic risk values (from simulation results)
         if (currentResults && currentResults.summary) {
             const s = currentResults.summary;
@@ -466,6 +469,68 @@ document.addEventListener("DOMContentLoaded", () => {
                         `Korjaustoimenpiteisiin ryhtyminen on perusteltua.</span>`;
                 }
             }
+        }
+    }
+
+    // ---- Update CO2 section ----
+    function updateCO2Section() {
+        const co2 = calculateCO2Emissions(INPUT_DATA);
+
+        // Summary cards
+        function formatT(val) {
+            if (val < 0) return `${val.toFixed(1)} t`;
+            if (val === 0) return "0 t";
+            return `~${val.toFixed(0)} t`;
+        }
+
+        setVal("co2-a-netto", formatT(co2.A.netto_t));
+        setVal("co2-a-rak", "0 t");
+        setVal("co2-a-puusto", `\u2212${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} t`);
+
+        setVal("co2-b-netto", formatT(co2.B.netto_t));
+        setVal("co2-b-rak", `~${(co2.B.rakentaminen_kg / 1000).toFixed(0)} t`);
+        setVal("co2-b-puusto", `\u2212${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} t`);
+
+        setVal("co2-c-netto", formatT(co2.C.netto_t));
+        setVal("co2-c-rak", `~${(co2.C.rakentaminen_kg / 1000).toFixed(0)} t`);
+        setVal("co2-c-puusto", `+${(co2.C.puusto_kg / 1000).toFixed(1)} t`);
+
+        // Comparison table
+        const tbody = document.getElementById("co2-table-body");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const rows = [
+            {
+                label: "Nettopäästöt (30 v)",
+                a: formatT(co2.A.netto_t),
+                b: formatT(co2.B.netto_t),
+                c: formatT(co2.C.netto_t),
+            },
+            {
+                label: "Helsinki\u2013Pariisi-lennot",
+                a: "\u2014",
+                b: `\u2248 ${co2.B.vertaukset.lennot_hki_pariisi} lentoa`,
+                c: `\u2248 ${co2.C.vertaukset.lennot_hki_pariisi} lentoa`,
+            },
+            {
+                label: "Henkilöauton ajokilometrit",
+                a: "\u2014",
+                b: `\u2248 ${(co2.B.vertaukset.autoilu_km / 1000).toFixed(0)} 000 km`,
+                c: `\u2248 ${(co2.C.vertaukset.autoilu_km / 1000).toFixed(0)} 000 km`,
+            },
+            {
+                label: "Keskivertosuomalaisen autoiluvuodet",
+                a: "\u2014",
+                b: `\u2248 ${co2.B.vertaukset.autoilu_vuodet} v`,
+                c: `\u2248 ${co2.C.vertaukset.autoilu_vuodet} v`,
+            },
+        ];
+
+        for (const r of rows) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td><strong>${r.label}</strong></td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td>`;
+            tbody.appendChild(tr);
         }
     }
 

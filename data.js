@@ -302,6 +302,184 @@ const DEFAULT_PARAMS = {
 // Structural element definitions
 // ============================================================
 
+// ============================================================
+// CO2 Emission Factors & Carbon Footprint Calculation
+//
+// Päästökertoimet perustuvat julkisiin tietokantoihin:
+// - CO2data.fi (Suomen ympäristökeskus)
+// - ICE Database v3.0 (University of Bath)
+// - Syke: Rakentamisen ympäristövaikutukset
+// - Nowak et al. (2002): puuston hiilensidontatutkimus
+// - McPherson & Simpson (1999): kaupunkipuuston hiilitase
+// ============================================================
+
+const CO2_FACTORS = {
+    // Rakennusmateriaalit (kg CO2e per yksikkö)
+    betoni: {
+        kerroin: 200,           // kg CO2e / m³ (C32/40, CO2data.fi)
+        yksikko: "m³",
+        lahde: "CO2data.fi; ICE Database v3.0",
+    },
+    teras: {
+        kerroin: 1.46,          // kg CO2e / kg (raudoitus, kierrätetty, ICE v3.0)
+        yksikko: "kg",
+        lahde: "ICE Database v3.0 (University of Bath)",
+    },
+    bitumikermi: {
+        kerroin: 3.5,           // kg CO2e / m² (valmistus + kuljetus)
+        yksikko: "m²",
+        lahde: "CO2data.fi; Syke",
+    },
+    maali: {
+        kerroin: 2.0,           // kg CO2e / m² (akrylaattimaali)
+        yksikko: "m²",
+        lahde: "ICE Database v3.0",
+    },
+    tyokoneet: {
+        kerroin: 0.27,          // kg CO2e / kWh diesel (työmaakoneet)
+        yksikko: "kWh",
+        lahde: "CO2data.fi; Lipasto/Syke",
+    },
+    purkujate: {
+        kerroin: 15,            // kg CO2e / t (kuljetus + käsittely)
+        yksikko: "t",
+        lahde: "Syke: Rakentamisen ympäristövaikutukset",
+    },
+
+    // Puuston hiilitase
+    puusto: {
+        iso_vaahtera_hiilivarasto_kg: 500,  // kg C / puu (suuri kaupunkivaahtera, Nowak et al. 2002)
+        vuotuinen_sidonta_kg_co2: 15,       // kg CO2 / puu / vuosi (McPherson & Simpson 1999)
+        puita_kpl: 2,                       // pihakannen suuret vaahterat
+        lahde: "Nowak et al. 2002; McPherson & Simpson 1999",
+    },
+
+    // Havainnollistaminen
+    vertaukset: {
+        lento_hki_pariisi_kg: 400,          // kg CO2e / lento (ilmasto.org)
+        auto_kg_per_km: 0.12,               // kg CO2e / km (henkilöauto, CO2data.fi)
+        suomalainen_autoilu_kg_per_v: 1800,  // kg CO2e / vuosi (tilastokeskus)
+    },
+};
+
+/**
+ * Laskee CO2-päästöt kullekin skenaariolle (A/B/C).
+ * Deterministinen laskenta — ei Monte Carloa.
+ *
+ * @param {Object} inputData - INPUT_DATA (data.js)
+ * @returns {Object} Eritelty päästölaskelma per skenaario
+ */
+function calculateCO2Emissions(inputData) {
+    const area = inputData.kohde_tiedot.pinta_ala_m2;
+    const puut = CO2_FACTORS.puusto.puita_kpl;
+    const vuodet = 30; // tarkasteluhorisontti puuston vaikutuksille
+
+    // ---- Skenaario A: Passiivinen ----
+    const a_rakentaminen = 0; // ei toimenpiteitä
+    const a_puusto_sidonta = puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet; // puut sitovat
+    const a_netto = a_rakentaminen - a_puusto_sidonta;
+
+    // ---- Skenaario B: Pintaremontti ----
+    const b_maali_seinat = 800;  // m² (seinäpinnat + palkit)
+    const b_bitumikermi_paikkaus = area * 0.2; // 20 % pinta-alasta paikataan
+    const b_teras_kg = 500;      // pienet korjaukset
+    const b_betoni_m3 = 5;       // paikkaus
+    const b_tyokoneet_kwh = 2000; // kevyt työmaa
+
+    const b_maali = b_maali_seinat * CO2_FACTORS.maali.kerroin;
+    const b_kermi = b_bitumikermi_paikkaus * CO2_FACTORS.bitumikermi.kerroin;
+    const b_ter = b_teras_kg * CO2_FACTORS.teras.kerroin;
+    const b_bet = b_betoni_m3 * CO2_FACTORS.betoni.kerroin;
+    const b_tyok = b_tyokoneet_kwh * CO2_FACTORS.tyokoneet.kerroin;
+    const b_rakentaminen = b_maali + b_kermi + b_ter + b_bet + b_tyok;
+    const b_puusto_sidonta = puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet;
+    const b_netto = b_rakentaminen - b_puusto_sidonta;
+
+    // ---- Skenaario C: Täyskorjaus ----
+    const c_bitumikermi = area; // koko pinta-ala
+    const c_betoni_m3 = 50;     // laaja betonityö
+    const c_teras_kg = 5000;    // raudoituskorjaukset
+    const c_tyokoneet_kwh = 15000; // raskas työmaa
+    const c_purkujate_t = 80;   // vanhan eristeen purku + betonijäte
+
+    const c_kermi = c_bitumikermi * CO2_FACTORS.bitumikermi.kerroin;
+    const c_bet = c_betoni_m3 * CO2_FACTORS.betoni.kerroin;
+    const c_ter = c_teras_kg * CO2_FACTORS.teras.kerroin;
+    const c_tyok = c_tyokoneet_kwh * CO2_FACTORS.tyokoneet.kerroin;
+    const c_purku = c_purkujate_t * CO2_FACTORS.purkujate.kerroin;
+    const c_rakentaminen = c_kermi + c_bet + c_ter + c_tyok + c_purku;
+
+    // Puusto: kaadetaan → hiilivarasto vapautuu + sidonta menetetään
+    const c_puusto_vapautuu = puut * CO2_FACTORS.puusto.iso_vaahtera_hiilivarasto_kg * (44 / 12); // C → CO2
+    const c_puusto_sidonta_menetys = puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet;
+    const c_puusto = c_puusto_vapautuu + c_puusto_sidonta_menetys;
+    const c_netto = c_rakentaminen + c_puusto;
+
+    // ---- Vertaukset ----
+    const v = CO2_FACTORS.vertaukset;
+
+    function vertaukset(netto_kg) {
+        const abs = Math.abs(netto_kg);
+        return {
+            lennot_hki_pariisi: Math.round(abs / v.lento_hki_pariisi_kg),
+            autoilu_km: Math.round(abs / v.auto_kg_per_km),
+            autoilu_vuodet: +(abs / v.suomalainen_autoilu_kg_per_v).toFixed(1),
+        };
+    }
+
+    return {
+        A: {
+            nimi: "Passiivinen",
+            rakentaminen_kg: a_rakentaminen,
+            puusto_kg: -a_puusto_sidonta,
+            netto_kg: a_netto,
+            netto_t: +(a_netto / 1000).toFixed(1),
+            erittely: [],
+            vertaukset: vertaukset(a_netto),
+        },
+        B: {
+            nimi: "Pintaremontti",
+            rakentaminen_kg: Math.round(b_rakentaminen),
+            puusto_kg: Math.round(-b_puusto_sidonta),
+            netto_kg: Math.round(b_netto),
+            netto_t: +(b_netto / 1000).toFixed(1),
+            erittely: [
+                { nimi: "Betonipaikkaus", kg: Math.round(b_bet) },
+                { nimi: "Teräskorjaukset", kg: Math.round(b_ter) },
+                { nimi: "Bitumikermi (paikkaus)", kg: Math.round(b_kermi) },
+                { nimi: "Maalaus", kg: Math.round(b_maali) },
+                { nimi: "Työkoneet", kg: Math.round(b_tyok) },
+            ],
+            vertaukset: vertaukset(b_netto),
+        },
+        C: {
+            nimi: "Täyskorjaus",
+            rakentaminen_kg: Math.round(c_rakentaminen),
+            puusto_kg: Math.round(c_puusto),
+            netto_kg: Math.round(c_netto),
+            netto_t: +(c_netto / 1000).toFixed(1),
+            erittely: [
+                { nimi: "Betonikorjaus", kg: Math.round(c_bet) },
+                { nimi: "Teräskorjaukset", kg: Math.round(c_ter) },
+                { nimi: "Bitumikermi (uusi)", kg: Math.round(c_kermi) },
+                { nimi: "Työkoneet", kg: Math.round(c_tyok) },
+                { nimi: "Purkujäte", kg: Math.round(c_purku) },
+                { nimi: "Puuston hiilivarasto vapautuu", kg: Math.round(c_puusto_vapautuu) },
+                { nimi: "Puuston sidonta menetetään (30 v)", kg: Math.round(c_puusto_sidonta_menetys) },
+            ],
+            vertaukset: vertaukset(c_netto),
+        },
+        puusto_30v: {
+            sidonta_kg: Math.round(puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet),
+            hiilivarasto_kg: Math.round(puut * CO2_FACTORS.puusto.iso_vaahtera_hiilivarasto_kg * (44 / 12)),
+        },
+    };
+}
+
+// ============================================================
+// Structural element definitions
+// ============================================================
+
 const STRUCTURAL_ELEMENTS = [
     {
         id: "pilarit",

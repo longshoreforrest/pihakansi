@@ -1398,3 +1398,9 @@ body::before {
 .scenario-comparison-table td:not(:first-child) {
   text-align: center;
 }
+
+/* ---- CO2 / Carbon Footprint Highlight ---- */
+.co2-highlight {
+  border-left: 4px solid var(--accent-emerald);
+  background: rgba(5, 150, 105, 0.06);
+}
