@@ -221,7 +221,7 @@ ${ReportGenerator._reportCSS()}
 <div class="scenario-box sc-c-box">
     <h4>Skenaario C: Täyskorjaus (${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur / 1e6).toFixed(1)} milj. \u20ac)</h4>
     <img src="skenaario-c.png" alt="Skenaario C: Täyskorjaus" style="width: 100%; border-radius: 6px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
-    <p class="box-note" style="font-size: 8pt; color: #666; margin-top: 0;">Havainnekuva hankesuunnitelmasta [36]. Vaahterat kaadetaan.</p>
+    <p class="box-note" style="font-size: 8pt; color: #666; margin-top: 0;">Havainnekuva hankesuunnitelmasta [36]. Hankesuunnitelmassa vaahterat kaadetaan, vaikka korjaus on toteutettavissa myös ne säilyttäen.</p>
     <div class="key-metric">
         <span class="value">${ReportGenerator._formatYear(s.C.collapse_risk_year)}</span>
         <span class="label">EC2-rajan alitus (mediaani)</span>
@@ -253,7 +253,8 @@ ${ReportGenerator._reportCSS()}
     <p class="box-note" style="color:#065f46;">
         Täyskorjaus pysäyttää pakkasrapautumisen ja pidentää käyttöikää ~${params.full_repair.extended_life_years} vuotta.
         Kustannus: ${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur / 1e6).toFixed(1)} milj. \u20ac (kilpailutettu).
-        Pihakannen vaahterat kaadetaan.
+        Hallituksen hankesuunnitelmassa pihakannen vaahterat kaadetaan. Vaahtereiden kaatamiselle
+        ei ole asiallista syytä \u2014 korjaus on toteutettavissa myös vaahterat säilyttäen.
     </p>
 </div>
 
@@ -2047,14 +2048,18 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         ${!isNaN(collapseC.p5) && collapseC.n > 0 ? `(90 % luottamusväli: ${Math.round(collapseC.p5)}\u2013${Math.round(collapseC.p95)})` : ''}.
         Täyskorjaus pysäyttää pakkasrapautumisen lähes kokonaan ja pidentää käyttöikää merkittävästi.
         Betonin lujuusreservin huomioiva oikaistu arvio on ~${formatAdjusted(adjustedMedianC)}.
-        Täyskorjaus edellyttää pihakannen vaahtereiden kaatamista.
+        Hallituksen hankesuunnitelmassa pihakannen vaahterat kaadetaan, vaikka vaahtereiden
+        kaatamiselle ei ole asiallista syytä ja korjaus on toteutettavissa myös ne säilyttäen.
     </li>
 </ol>
 <p>
     Pintaremontti (skenaario B) tuottaa täyskorjausta (skenaario C) viihtyisämmän ja vihreämmän
     lopputuloksen, koska pihakannen suuret vaahterat &mdash; Itä-Pasilan suurimmat puut &mdash;
-    säilytetään ja piha-alueen istutuksia kohennetaan. Täyskorjaus edellyttää vaahtereiden
-    kaatamista, minkä jälkeen piha-alueen palautuminen nykyiselle vihreystasolle vie vuosikymmeniä.
+    säilytetään ja piha-alueen istutuksia kohennetaan. Hallituksen hankesuunnitelmassa täyskorjaus
+    edellyttää vaahtereiden kaatamista, minkä jälkeen piha-alueen palautuminen nykyiselle
+    vihreystasolle veisi vuosikymmeniä. Vaahtereiden kaatamiselle ei ole rakenteellista
+    eikä muutakaan asiallista syytä &mdash; koko vesieristeen uusimisen sisältävä remontti
+    on toteutettavissa myös vaahterat säilyttäen.
 </p>
 
 <h3>Johtopäätös korjaustarpeesta</h3>
@@ -2074,9 +2079,11 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     ovat suositelleet korjausta, ja vesieristeen korjaus on pitkällä aikavälillä perusteltua
     pakkasrapautumisen pysäyttämiseksi. Korjauksen ajoituksessa on kuitenkin liikkumavaraa, ja
     päätöksentekijät voivat harkita korjausta osana normaalia kiinteistön ylläpitosuunnitelmaa
-    ilman erityistä kiireellisyyttä. On myös huomattava, että täyskorjaus (skenaario C) edellyttäisi
-    pihakannen kahden suuren vaahteran kaatamista &mdash; puut ovat Itä-Pasilan suurimmat ja
-    kuusikerroksisen kerrostalon korkuiset.
+    ilman erityistä kiireellisyyttä. On myös huomattava, että hallituksen valmistelemassa
+    hankesuunnitelmassa täyskorjaus (skenaario C) edellyttäisi pihakannen kahden suuren vaahteran
+    kaatamista &mdash; puut ovat Itä-Pasilan suurimmat ja kuusikerroksisen kerrostalon korkuiset.
+    Vaahtereiden kaatamiselle ei ole asiallista syytä: vesieristeen uusimisen sisältävä
+    täyskorjaus on toteutettavissa myös vaahterat säilyttäen.
 </p>
 
 <h3>Suositukset</h3>
