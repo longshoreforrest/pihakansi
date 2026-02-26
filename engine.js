@@ -160,6 +160,7 @@ class SimulationEngine {
                 A: this._runScenario("A", N, years),
                 B: this._runScenario("B", N, years),
                 C: this._runScenario("C", N, years),
+                D: this._runScenario("D", N, years),
             },
             element_analysis: this._runElementAnalysis(N),
             summary: {},
@@ -265,7 +266,7 @@ class SimulationEngine {
             if (scenario === "B") {
                 effectiveFrostRate *= 1 - p.light_repair.frost_rate_reduction;
                 repairYear = p.current_year;
-            } else if (scenario === "C") {
+            } else if (scenario === "C" || scenario === "D") {
                 effectiveFrostRate *= 1 - p.full_repair.frost_rate_reduction;
                 effectiveK *= 1 - p.full_repair.carbonation_k_reduction;
                 repairYear = p.current_year;
@@ -289,7 +290,7 @@ class SimulationEngine {
                         t_before, frost_rate, accel
                     );
                     const damageAfter = SimulationEngine.frostDamage(
-                        t_after, effectiveFrostRate, scenario === "C" ? 1.0 : accel
+                        t_after, effectiveFrostRate, (scenario === "C" || scenario === "D") ? 1.0 : accel
                     );
                     frost_damage[yi].push(damageBefore + damageAfter);
                 } else {
@@ -308,7 +309,7 @@ class SimulationEngine {
                 } else if (scenario === "B" && year >= repairYear + p.light_repair.carbonation_pause_years) {
                     // After pause: continues from paused depth (time shift by pause duration)
                     carbDepth = SimulationEngine.carbonationDepth(k_tt, t_total - p.light_repair.carbonation_pause_years, dampAge, dampFactor);
-                } else if (scenario === "C" && year > repairYear) {
+                } else if ((scenario === "C" || scenario === "D") && year > repairYear) {
                     // After full repair: equivalent age continuation with reduced k
                     const carbBefore = SimulationEngine.carbonationDepth(k_tt, repairYear - p.start_year, dampAge, dampFactor);
                     const t_equiv = effectiveK > 0 ? SimulationEngine.carbonationInverseAge(effectiveK, carbBefore, dampAge, dampFactor) : Infinity;
@@ -333,7 +334,8 @@ class SimulationEngine {
                 let effectiveBearing;
                 if (scenario !== "A" && year > repairYear) {
                     const lossBefore = edgeFactor * bearing_rate * (repairYear - p.frost.critical_saturation_year);
-                    const lossAfter = edgeFactor * (bearing_rate * (1 - (scenario === "B" ? p.light_repair.frost_rate_reduction : p.full_repair.frost_rate_reduction))) * (year - repairYear);
+                    const reductionFactor = scenario === "B" ? p.light_repair.frost_rate_reduction : p.full_repair.frost_rate_reduction;
+                    const lossAfter = edgeFactor * (bearing_rate * (1 - reductionFactor)) * (year - repairYear);
                     effectiveBearing = Math.max(0, p.tukipinta.original_depth_mm - lossBefore - lossAfter);
                 } else {
                     effectiveBearing = SimulationEngine.effectiveBearing(
@@ -478,7 +480,9 @@ class SimulationEngine {
                     ? "Passiivinen (ei korjauksia)"
                     : scId === "B"
                         ? "Kevyt korjaus"
-                        : "Täyskorjaus";
+                        : scId === "C"
+                            ? "Täyskorjaus"
+                            : "Täyskorjaus (puut säilyttäen)";
 
             summary[scId] = {
                 name: scenarioName,

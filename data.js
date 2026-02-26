@@ -363,7 +363,7 @@ const CO2_FACTORS = {
 };
 
 /**
- * Laskee CO2-päästöt kullekin skenaariolle (A/B/C).
+ * Laskee CO2-päästöt kullekin skenaariolle (A/B/C/D).
  * Deterministinen laskenta — ei Monte Carloa.
  *
  * @param {Object} inputData - INPUT_DATA (data.js)
@@ -414,6 +414,25 @@ function calculateCO2Emissions(inputData) {
     const c_puusto_sidonta_menetys = puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet;
     const c_puusto = c_puusto_vapautuu + c_puusto_sidonta_menetys;
     const c_netto = c_rakentaminen + c_puusto;
+
+    // ---- Skenaario D: Täyskorjaus (puut säilyttäen) ----
+    // Sama kuin C mutta puualue (~156 m², ~10 %) ei vaadi työtä → ~90 % C:n päästöistä
+    // Puusto: säilytetään → hiilinielu jatkuu kuten A/B
+    const d_area_factor = (area - 156) / area; // ~0.90
+    const d_bitumikermi = area * d_area_factor;
+    const d_betoni_m3 = c_betoni_m3 * d_area_factor;
+    const d_teras_kg = c_teras_kg * d_area_factor;
+    const d_tyokoneet_kwh = c_tyokoneet_kwh * d_area_factor;
+    const d_purkujate_t = c_purkujate_t * d_area_factor;
+
+    const d_kermi = d_bitumikermi * CO2_FACTORS.bitumikermi.kerroin;
+    const d_bet = d_betoni_m3 * CO2_FACTORS.betoni.kerroin;
+    const d_ter = d_teras_kg * CO2_FACTORS.teras.kerroin;
+    const d_tyok = d_tyokoneet_kwh * CO2_FACTORS.tyokoneet.kerroin;
+    const d_purku = d_purkujate_t * CO2_FACTORS.purkujate.kerroin;
+    const d_rakentaminen = d_kermi + d_bet + d_ter + d_tyok + d_purku;
+    const d_puusto_sidonta = puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet;
+    const d_netto = d_rakentaminen - d_puusto_sidonta;
 
     // ---- Vertaukset ----
     const v = CO2_FACTORS.vertaukset;
@@ -468,6 +487,21 @@ function calculateCO2Emissions(inputData) {
                 { nimi: "Puuston sidonta menetetään (30 v)", kg: Math.round(c_puusto_sidonta_menetys) },
             ],
             vertaukset: vertaukset(c_netto),
+        },
+        D: {
+            nimi: "Täyskorjaus (puut säilyttäen)",
+            rakentaminen_kg: Math.round(d_rakentaminen),
+            puusto_kg: Math.round(-d_puusto_sidonta),
+            netto_kg: Math.round(d_netto),
+            netto_t: +(d_netto / 1000).toFixed(1),
+            erittely: [
+                { nimi: "Betonikorjaus", kg: Math.round(d_bet) },
+                { nimi: "Teräskorjaukset", kg: Math.round(d_ter) },
+                { nimi: "Bitumikermi (uusi)", kg: Math.round(d_kermi) },
+                { nimi: "Työkoneet", kg: Math.round(d_tyok) },
+                { nimi: "Purkujäte", kg: Math.round(d_purku) },
+            ],
+            vertaukset: vertaukset(d_netto),
         },
         puusto_30v: {
             sidonta_kg: Math.round(puut * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2 * vuodet),

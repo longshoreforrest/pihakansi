@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const s = currentResults.summary;
         const params = readParams();
 
-        for (const scId of ["A", "B", "C"]) {
+        for (const scId of ["A", "B", "C", "D"]) {
             const sc = s[scId];
             if (!sc) continue;
 
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
             tdYear.style.fontWeight = "600";
             row.appendChild(tdYear);
 
-            for (const scId of ["A", "B", "C"]) {
+            for (const scId of ["A", "B", "C", "D"]) {
                 const stats = currentResults.scenarios[scId].stats[yi];
 
                 // Frost damage
@@ -384,15 +384,27 @@ document.addEventListener("DOMContentLoaded", () => {
         setVal("sc-c-cost", p.full_repair.cost_eur_per_m2);
         setVal("sc-c-total-cost", (p.full_repair.cost_eur_per_m2 * area).toLocaleString("fi-FI"));
 
+        // Scenario D params (same tech as C, ~10% less cost)
+        const dAreaFactor = (area - 156) / area;
+        setVal("sc-d-frost-red", (p.full_repair.frost_rate_reduction * 100).toFixed(0));
+        setVal("sc-d-k-red", (p.full_repair.carbonation_k_reduction * 100).toFixed(0));
+        setVal("sc-d-life-ext", p.full_repair.extended_life_years);
+        setVal("sc-d-total-cost", Math.round(p.full_repair.cost_eur_per_m2 * area * dAreaFactor).toLocaleString("fi-FI"));
+
         // Comparison table static params
         setVal("sc-comp-b-frost", (p.light_repair.frost_rate_reduction * 100).toFixed(0) + " %");
         setVal("sc-comp-c-frost", (p.full_repair.frost_rate_reduction * 100).toFixed(0) + " %");
+        setVal("sc-comp-d-frost", (p.full_repair.frost_rate_reduction * 100).toFixed(0) + " %");
         setVal("sc-comp-c-carb", "k \u2212" + (p.full_repair.carbonation_k_reduction * 100).toFixed(0) + " %");
+        setVal("sc-comp-d-carb", "k \u2212" + (p.full_repair.carbonation_k_reduction * 100).toFixed(0) + " %");
         setVal("sc-comp-c-life", "+" + p.full_repair.extended_life_years + " v");
+        setVal("sc-comp-d-life", "+" + p.full_repair.extended_life_years + " v");
         setVal("sc-comp-b-cost", p.light_repair.cost_eur_per_m2 + " \u20ac/m\u00b2");
         setVal("sc-comp-c-cost", p.full_repair.cost_eur_per_m2 + " \u20ac/m\u00b2");
+        setVal("sc-comp-d-cost", Math.round(p.full_repair.cost_eur_per_m2 * dAreaFactor) + " \u20ac/m\u00b2");
         setVal("sc-comp-b-total", (p.light_repair.cost_eur_per_m2 * area).toLocaleString("fi-FI") + " \u20ac");
         setVal("sc-comp-c-total", (p.full_repair.cost_eur_per_m2 * area).toLocaleString("fi-FI") + " \u20ac");
+        setVal("sc-comp-d-total", Math.round(p.full_repair.cost_eur_per_m2 * area * dAreaFactor).toLocaleString("fi-FI") + " \u20ac");
 
         // CO2 section (deterministic, not dependent on simulation)
         updateCO2Section();
@@ -400,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Comparison table dynamic risk values (from simulation results)
         if (currentResults && currentResults.summary) {
             const s = currentResults.summary;
-            for (const [scId, prefix] of [["A", "a"], ["B", "b"], ["C", "c"]]) {
+            for (const [scId, prefix] of [["A", "a"], ["B", "b"], ["C", "c"], ["D", "d"]]) {
                 const sc = s[scId];
                 if (!sc) continue;
                 setVal(`sc-comp-${prefix}-risk2035`, ((sc.collapse_prob_2035 || 0) * 100).toFixed(1) + " %");
@@ -495,6 +507,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setVal("co2-c-rak", `~${(co2.C.rakentaminen_kg / 1000).toFixed(0)} t`);
         setVal("co2-c-puusto", `+${(co2.C.puusto_kg / 1000).toFixed(1)} t`);
 
+        setVal("co2-d-netto", formatT(co2.D.netto_t));
+        setVal("co2-d-rak", `~${(co2.D.rakentaminen_kg / 1000).toFixed(0)} t`);
+        setVal("co2-d-puusto", `\u2212${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} t`);
+
         // Comparison table
         const tbody = document.getElementById("co2-table-body");
         if (!tbody) return;
@@ -502,34 +518,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const rows = [
             {
-                label: "Nettopäästöt (30 v)",
+                label: "Nettop\u00e4\u00e4st\u00f6t (30 v)",
                 a: formatT(co2.A.netto_t),
                 b: formatT(co2.B.netto_t),
                 c: formatT(co2.C.netto_t),
+                d: formatT(co2.D.netto_t),
             },
             {
                 label: "Helsinki\u2013Pariisi-lennot",
                 a: "\u2014",
                 b: `\u2248 ${co2.B.vertaukset.lennot_hki_pariisi} lentoa`,
                 c: `\u2248 ${co2.C.vertaukset.lennot_hki_pariisi} lentoa`,
+                d: `\u2248 ${co2.D.vertaukset.lennot_hki_pariisi} lentoa`,
             },
             {
-                label: "Henkilöauton ajokilometrit",
+                label: "Henkil\u00f6auton ajokilometrit",
                 a: "\u2014",
                 b: `\u2248 ${(co2.B.vertaukset.autoilu_km / 1000).toFixed(0)} 000 km`,
                 c: `\u2248 ${(co2.C.vertaukset.autoilu_km / 1000).toFixed(0)} 000 km`,
+                d: `\u2248 ${(co2.D.vertaukset.autoilu_km / 1000).toFixed(0)} 000 km`,
             },
             {
                 label: "Keskivertosuomalaisen autoiluvuodet",
                 a: "\u2014",
                 b: `\u2248 ${co2.B.vertaukset.autoilu_vuodet} v`,
                 c: `\u2248 ${co2.C.vertaukset.autoilu_vuodet} v`,
+                d: `\u2248 ${co2.D.vertaukset.autoilu_vuodet} v`,
             },
         ];
 
         for (const r of rows) {
             const tr = document.createElement("tr");
-            tr.innerHTML = `<td><strong>${r.label}</strong></td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td>`;
+            tr.innerHTML = `<td><strong>${r.label}</strong></td><td>${r.a}</td><td>${r.b}</td><td>${r.c}</td><td>${r.d}</td>`;
             tbody.appendChild(tr);
         }
     }

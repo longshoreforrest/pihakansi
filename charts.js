@@ -10,6 +10,7 @@ class ChartManager {
             A: { main: "#f43f5e", light: "rgba(244, 63, 94, 0.15)", fill: "rgba(244, 63, 94, 0.08)" },
             B: { main: "#f59e0b", light: "rgba(245, 158, 11, 0.15)", fill: "rgba(245, 158, 11, 0.08)" },
             C: { main: "#10b981", light: "rgba(16, 185, 129, 0.15)", fill: "rgba(16, 185, 129, 0.08)" },
+            D: { main: "#6366f1", light: "rgba(99, 102, 241, 0.15)", fill: "rgba(99, 102, 241, 0.08)" },
         };
         this.elementColors = {
             pilarit: "#6366f1",

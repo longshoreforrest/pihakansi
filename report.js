@@ -23,6 +23,7 @@ class ReportGenerator {
         const yearExceed5A = ReportGenerator._yearWhenProbExceeds(results, 'A', 'collapse_probability', 0.05);
         const yearExceed5B = ReportGenerator._yearWhenProbExceeds(results, 'B', 'collapse_probability', 0.05);
         const yearExceed5C = ReportGenerator._yearWhenProbExceeds(results, 'C', 'collapse_probability', 0.05);
+        const yearExceed5D = ReportGenerator._yearWhenProbExceeds(results, 'D', 'collapse_probability', 0.05);
         const waitingYearsA = yearExceed5A ? yearExceed5A - 2026 : null;
         const edgeFactor = params.tukipinta.reunakerroin || 1.5;
         const bearingMargin2026 = params.tukipinta.original_depth_mm - edgeFactor * params.tukipinta.rapautuminen_reuna_mm_per_year * (2026 - params.frost.critical_saturation_year);
@@ -40,6 +41,7 @@ class ReportGenerator {
         const adjustedMedianA = adjustYear(s.A.collapse_risk_year?.median);
         const adjustedMedianB = adjustYear(s.B.collapse_risk_year?.median);
         const adjustedMedianC = adjustYear(s.C.collapse_risk_year?.median);
+        const adjustedMedianD = adjustYear(s.D.collapse_risk_year?.median);
         const adjustedExceed5A = adjustYear(yearExceed5A);
 
         function formatAdjusted(year) {
@@ -82,7 +84,7 @@ ${ReportGenerator._reportCSS()}
         <table>
             <tr><td>Menetelmä</td><td>Monte Carlo -simulaatio (N = ${params.monte_carlo_iterations.toLocaleString("fi-FI")})</td></tr>
             <tr><td>Analyysihorisontti</td><td>${params.start_year}–${params.end_year}</td></tr>
-            <tr><td>Skenaariot</td><td>A (passiivinen), B (pintaremontti), C (täyskorjaus)</td></tr>
+            <tr><td>Skenaariot</td><td>A (passiivinen), B (pintaremontti), C (täyskorjaus), D (täyskorjaus, puut säilyttäen)</td></tr>
             <tr><td>Raportin päiväys</td><td>${dateStr}</td></tr>
         </table>
     </div>
@@ -91,7 +93,7 @@ ${ReportGenerator._reportCSS()}
 <!-- ===== TIIVISTELMÄ ===== -->
 <div class="page-break"></div>
 <div class="executive-summary">
-<h2>Tiivistelmä päätöksentekijöille</h2>
+<h2 id="ch-tiivistelma">Tiivistelmä päätöksentekijöille</h2>
 
 <p>
     <strong>${inputData.kohde_tiedot.nimi}n pihakannen</strong> (rak. ${inputData.kohde_tiedot.rakennettu})
@@ -258,58 +260,99 @@ ${ReportGenerator._reportCSS()}
     </p>
 </div>
 
+<div class="scenario-box sc-d-box">
+    <h4>Skenaario D: Täyskorjaus, puut säilyttäen (~${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur * 0.9 / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur * 0.9 / 1e6).toFixed(1)} milj. \u20ac)</h4>
+    <img src="skenaario-c.png" alt="Skenaario D: Täyskorjaus puut säilyttäen" style="width: 100%; border-radius: 6px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+    <p class="box-note" style="font-size: 8pt; color: #666; margin-top: 0;">Havainnekuva hankesuunnitelman täyskorjauksesta [36]. Skenaariossa D vaahterat säilytetään.</p>
+    <div class="key-metric">
+        <span class="value">${ReportGenerator._formatYear(s.D.collapse_risk_year)}</span>
+        <span class="label">EC2-rajan alitus (mediaani)</span>
+    </div>
+    <div class="key-metric">
+        <span class="value">${yearExceed5D || '\u2014'}</span>
+        <span class="label">EC2-suunnitteluraja saavutetaan</span>
+    </div>
+    <div class="key-metric">
+        <span class="value">${((s.D.collapse_prob_2035 || 0) * 100).toFixed(1)} %</span>
+        <span class="label">EC2-raja alittuu 2035 (%)</span>
+    </div>
+    <div class="key-metric">
+        <span class="value">${((s.D.collapse_prob_2050 || 0) * 100).toFixed(1)} %</span>
+        <span class="label">EC2-raja alittuu 2050 (%)</span>
+    </div>
+    <div class="key-metric">
+        <span class="value">${((s.D.collapse_prob_2075 || 0) * 100).toFixed(1)} %</span>
+        <span class="label">EC2-raja alittuu 2075 (%)</span>
+    </div>
+    <div class="key-metric">
+        <span class="value">${((s.D.collapse_prob_2100 || 0) * 100).toFixed(1)} %</span>
+        <span class="label">EC2-raja alittuu 2100 (%)</span>
+    </div>
+    <div class="key-metric">
+        <span class="value" style="color: #6366f1;">~${formatAdjusted(adjustedMedianD)}</span>
+        <span class="label">Oikaistu arvio (betonin lujuusreservi, luku 4.4)</span>
+    </div>
+    <p class="box-note" style="color:#4338ca;">
+        Täyskorjaus puut säilyttäen yhdistää täyskorjauksen rakenteelliset hyödyt puuston säilyttämiseen.
+        Pakkasrapautuminen pysähtyy ja käyttöikä pitenee ~${params.full_repair.extended_life_years} vuotta.
+        Kustannus: ~${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur * 0.9 / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur * 0.9 / 1e6).toFixed(1)} milj. \u20ac (~10\u00a0% vähemmän kuin C, puualuetta ~156\u00a0m\u00b2 ei tarvitse purkaa).
+        Pihakannen vaahterat säilytetään erillisessä kasvualustassa (syvyys 1\u20131,5\u00a0m, mitoitettu 4 puulle, 2 jäljellä).
+        Kaupunkikuvallinen arvo ja hiilinielu säilyvät. Patolevy-vaihtoehto suojaa rakenteita juuristolta.
+    </p>
+</div>
+
 </div>
 
 <!-- ===== SISÄLLYSLUETTELO ===== -->
 <div class="page-break"></div>
 <h2 class="toc-title">Sisällysluettelo</h2>
 <div class="toc">
-    <div class="toc-item"><span class="toc-num"></span><span class="toc-text"><strong>Tiivistelmä päätöksentekijöille</strong></span></div>
-    <div class="toc-item"><span class="toc-num">1</span><span class="toc-text">Johdanto</span></div>
-    <div class="toc-item"><span class="toc-num">2</span><span class="toc-text">Kohdetiedot</span></div>
-    <div class="toc-item"><span class="toc-num">3</span><span class="toc-text">Kuntotutkimustulokset</span></div>
-    <div class="toc-item sub"><span class="toc-num">3.1</span><span class="toc-text">Kuntotutkimus 2006</span></div>
-    <div class="toc-item sub"><span class="toc-num">3.2</span><span class="toc-text">Kuntotutkimus 2024</span></div>
-    <div class="toc-item sub"><span class="toc-num">3.3</span><span class="toc-text">Mittaustulosten vertailu ja kehityssuunta</span></div>
-    <div class="toc-item"><span class="toc-num">4</span><span class="toc-text">Laskentamenetelmät</span></div>
-    <div class="toc-item sub"><span class="toc-num">4.1</span><span class="toc-text">Karbonatisaatiomalli</span></div>
-    <div class="toc-item sub"><span class="toc-num">4.2</span><span class="toc-text">Pakkasrapautumismalli</span></div>
-    <div class="toc-item sub"><span class="toc-num">4.3</span><span class="toc-text">Tukipinta-analyysi</span></div>
-    <div class="toc-item sub"><span class="toc-num">4.4</span><span class="toc-text">Mallin konservatiivisuuden arviointi</span></div>
-    <div class="toc-item sub"><span class="toc-num">4.5</span><span class="toc-text">Monte Carlo -simulaatio</span></div>
-    <div class="toc-item"><span class="toc-num">5</span><span class="toc-text">Mallin kalibrointi ja sopivuus kenttädataan</span></div>
-    <div class="toc-item sub"><span class="toc-num">5.1</span><span class="toc-text">Karbonatisaation sopivuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">5.2</span><span class="toc-text">Pakkasrapautumisen sopivuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">5.3</span><span class="toc-text">Tukipinnan sopivuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">5.4</span><span class="toc-text">Korroosioasteen sopivuus</span></div>
-    <div class="toc-item"><span class="toc-num">6</span><span class="toc-text">Korjausskenaariot</span></div>
-    <div class="toc-item"><span class="toc-num">7</span><span class="toc-text">Simulaatiotulokset</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.1</span><span class="toc-text">Skenaarioiden yhteenveto</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.2</span><span class="toc-text">Karbonatisaation eteneminen</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.3</span><span class="toc-text">Pakkasrapautumisen kertymä</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.4</span><span class="toc-text">Tukipinnan tehollinen pituus</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.5</span><span class="toc-text">EC2-vähimmäistukipinnan alituksen todennäköisyys</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.6</span><span class="toc-text">Korroosion todennäköisyys</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.7</span><span class="toc-text">Rakenneosakohtainen analyysi</span></div>
-    <div class="toc-item sub"><span class="toc-num">7.8</span><span class="toc-text">Skenaariovertailu</span></div>
-    <div class="toc-item"><span class="toc-num">8</span><span class="toc-text">Hiilijalanjälkianalyysi</span></div>
-    <div class="toc-item sub"><span class="toc-num">8.1</span><span class="toc-text">Päästökertoimet</span></div>
-    <div class="toc-item sub"><span class="toc-num">8.2</span><span class="toc-text">Skenaariokohtaiset päästöt</span></div>
-    <div class="toc-item sub"><span class="toc-num">8.3</span><span class="toc-text">Vertailu ja havainnollistaminen</span></div>
-    <div class="toc-item sub"><span class="toc-num">8.4</span><span class="toc-text">Puuston merkitys hiilitaseessa</span></div>
-    <div class="toc-item"><span class="toc-num">9</span><span class="toc-text">Vuosikohtaiset tulokset</span></div>
-    <div class="toc-item"><span class="toc-num">10</span><span class="toc-text">Laskennan luotettavuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">10.1</span><span class="toc-text">Tieteellinen perusta ja kirjallisuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">10.2</span><span class="toc-text">Kalibrointi 50 vuoden kenttädataan</span></div>
-    <div class="toc-item sub"><span class="toc-num">10.3</span><span class="toc-text">Monte Carlo -simulaation luotettavuus</span></div>
-    <div class="toc-item sub"><span class="toc-num">10.4</span><span class="toc-text">Rajoitukset ja epävarmuustekijät</span></div>
-    <div class="toc-item"><span class="toc-num">11</span><span class="toc-text">Johtopäätökset ja suositukset</span></div>
-    <div class="toc-item"><span class="toc-num">12</span><span class="toc-text">Lähdeluettelo</span></div>
+    <a href="#ch-tiivistelma" class="toc-item"><span class="toc-num"></span><span class="toc-text"><strong>Tiivistelmä päätöksentekijöille</strong></span></a>
+    <a href="#ch-1" class="toc-item"><span class="toc-num">1</span><span class="toc-text">Johdanto</span></a>
+    <a href="#ch-2" class="toc-item"><span class="toc-num">2</span><span class="toc-text">Kohdetiedot</span></a>
+    <a href="#ch-3" class="toc-item"><span class="toc-num">3</span><span class="toc-text">Kuntotutkimustulokset</span></a>
+    <a href="#ch-3-1" class="toc-item sub"><span class="toc-num">3.1</span><span class="toc-text">Kuntotutkimus 2006</span></a>
+    <a href="#ch-3-2" class="toc-item sub"><span class="toc-num">3.2</span><span class="toc-text">Kuntotutkimus 2024</span></a>
+    <a href="#ch-3-3" class="toc-item sub"><span class="toc-num">3.3</span><span class="toc-text">Mittaustulosten vertailu ja kehityssuunta</span></a>
+    <a href="#ch-4" class="toc-item"><span class="toc-num">4</span><span class="toc-text">Laskentamenetelmät</span></a>
+    <a href="#ch-4-1" class="toc-item sub"><span class="toc-num">4.1</span><span class="toc-text">Karbonatisaatiomalli</span></a>
+    <a href="#ch-4-2" class="toc-item sub"><span class="toc-num">4.2</span><span class="toc-text">Pakkasrapautumismalli</span></a>
+    <a href="#ch-4-3" class="toc-item sub"><span class="toc-num">4.3</span><span class="toc-text">Tukipinta-analyysi</span></a>
+    <a href="#ch-4-4" class="toc-item sub"><span class="toc-num">4.4</span><span class="toc-text">Mallin konservatiivisuuden arviointi</span></a>
+    <a href="#ch-4-5" class="toc-item sub"><span class="toc-num">4.5</span><span class="toc-text">Monte Carlo -simulaatio</span></a>
+    <a href="#ch-5" class="toc-item"><span class="toc-num">5</span><span class="toc-text">Mallin kalibrointi ja sopivuus kenttädataan</span></a>
+    <a href="#ch-5-1" class="toc-item sub"><span class="toc-num">5.1</span><span class="toc-text">Karbonatisaation sopivuus</span></a>
+    <a href="#ch-5-2" class="toc-item sub"><span class="toc-num">5.2</span><span class="toc-text">Pakkasrapautumisen sopivuus</span></a>
+    <a href="#ch-5-3" class="toc-item sub"><span class="toc-num">5.3</span><span class="toc-text">Tukipinnan sopivuus</span></a>
+    <a href="#ch-5-4" class="toc-item sub"><span class="toc-num">5.4</span><span class="toc-text">Korroosioasteen sopivuus</span></a>
+    <a href="#ch-6" class="toc-item"><span class="toc-num">6</span><span class="toc-text">Korjausskenaariot</span></a>
+    <a href="#ch-7" class="toc-item"><span class="toc-num">7</span><span class="toc-text">Simulaatiotulokset</span></a>
+    <a href="#ch-7-1" class="toc-item sub"><span class="toc-num">7.1</span><span class="toc-text">Skenaarioiden yhteenveto</span></a>
+    <a href="#ch-7-2" class="toc-item sub"><span class="toc-num">7.2</span><span class="toc-text">Karbonatisaation eteneminen</span></a>
+    <a href="#ch-7-3" class="toc-item sub"><span class="toc-num">7.3</span><span class="toc-text">Pakkasrapautumisen kertymä</span></a>
+    <a href="#ch-7-4" class="toc-item sub"><span class="toc-num">7.4</span><span class="toc-text">Tukipinnan tehollinen pituus</span></a>
+    <a href="#ch-7-5" class="toc-item sub"><span class="toc-num">7.5</span><span class="toc-text">EC2-vähimmäistukipinnan alituksen todennäköisyys</span></a>
+    <a href="#ch-7-6" class="toc-item sub"><span class="toc-num">7.6</span><span class="toc-text">Korroosion todennäköisyys</span></a>
+    <a href="#ch-7-7" class="toc-item sub"><span class="toc-num">7.7</span><span class="toc-text">Rakenneosakohtainen analyysi</span></a>
+    <a href="#ch-7-8" class="toc-item sub"><span class="toc-num">7.8</span><span class="toc-text">Skenaariovertailu</span></a>
+    <a href="#ch-8" class="toc-item"><span class="toc-num">8</span><span class="toc-text">Hiilijalanjälkianalyysi</span></a>
+    <a href="#ch-8-1" class="toc-item sub"><span class="toc-num">8.1</span><span class="toc-text">Päästökertoimet</span></a>
+    <a href="#ch-8-2" class="toc-item sub"><span class="toc-num">8.2</span><span class="toc-text">Skenaariokohtaiset päästöt</span></a>
+    <a href="#ch-8-3" class="toc-item sub"><span class="toc-num">8.3</span><span class="toc-text">Vertailu ja havainnollistaminen</span></a>
+    <a href="#ch-8-4" class="toc-item sub"><span class="toc-num">8.4</span><span class="toc-text">Puuston merkitys hiilitaseessa</span></a>
+    <a href="#ch-9" class="toc-item"><span class="toc-num">9</span><span class="toc-text">Vuosikohtaiset tulokset</span></a>
+    <a href="#ch-10" class="toc-item"><span class="toc-num">10</span><span class="toc-text">Laskennan luotettavuus</span></a>
+    <a href="#ch-10-1" class="toc-item sub"><span class="toc-num">10.1</span><span class="toc-text">Tieteellinen perusta ja kirjallisuus</span></a>
+    <a href="#ch-10-2" class="toc-item sub"><span class="toc-num">10.2</span><span class="toc-text">Kalibrointi 50 vuoden kenttädataan</span></a>
+    <a href="#ch-10-3" class="toc-item sub"><span class="toc-num">10.3</span><span class="toc-text">Monte Carlo -simulaation luotettavuus</span></a>
+    <a href="#ch-10-4" class="toc-item sub"><span class="toc-num">10.4</span><span class="toc-text">Rajoitukset ja epävarmuustekijät</span></a>
+    <a href="#ch-11" class="toc-item"><span class="toc-num">11</span><span class="toc-text">Johtopäätökset ja suositukset</span></a>
+    <a href="#ch-12" class="toc-item"><span class="toc-num">12</span><span class="toc-text">Lähdeluettelo</span></a>
 </div>
 
 <!-- ===== 1. JOHDANTO ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">1</span> Johdanto</h2>
+<h2 id="ch-1"><span class="chapter-num">1</span> Johdanto</h2>
 
 <p>
     Tässä raportissa esitetään ${inputData.kohde_tiedot.nimi}n pihakannen rakenteellinen käyttöikäanalyysi.
@@ -326,7 +369,7 @@ ${ReportGenerator._reportCSS()}
     (v. ${inputData.mittaustiedot_2006.suositus_remontille} ja v. ${inputData.mittaustiedot_2024.suositus_remontille}).
 </p>
 <p>
-    Analyysin tarkoituksena on arvioida rakenteen jäljellä oleva käyttöikä kolmen eri korjausskenaarion
+    Analyysin tarkoituksena on arvioida rakenteen jäljellä oleva käyttöikä neljän eri korjausskenaarion
     valossa käyttäen probabilistista Monte Carlo -simulaatiomenetelmää. Menetelmä ottaa huomioon
     materiaalien ominaisuuksien tilastollisen hajonnan ja tuottaa todennäköisyyspohjaisen arvion
     vaurioiden etenemisestä ja tukipinnan riittävyydestä suhteessa Eurokoodi 2:n vaatimuksiin [1, 7, 12].
@@ -341,7 +384,7 @@ ${ReportGenerator._reportCSS()}
 </ol>
 
 <!-- ===== 2. KOHDETIEDOT ===== -->
-<h2><span class="chapter-num">2</span> Kohdetiedot</h2>
+<h2 id="ch-2"><span class="chapter-num">2</span> Kohdetiedot</h2>
 
 <table class="data-table">
     <tr><td class="label-cell">Kohde</td><td>${inputData.kohde_tiedot.nimi}</td></tr>
@@ -415,9 +458,9 @@ ${ReportGenerator._reportCSS()}
 
 <!-- ===== 3. KUNTOTUTKIMUSTULOKSET ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">3</span> Kuntotutkimustulokset</h2>
+<h2 id="ch-3"><span class="chapter-num">3</span> Kuntotutkimustulokset</h2>
 
-<h3><span class="chapter-num">3.1</span> Kuntotutkimus 2006</h3>
+<h3 id="ch-3-1"><span class="chapter-num">3.1</span> Kuntotutkimus 2006</h3>
 <p>
     Ensimmäinen kuntotutkimus tehtiin vuonna ${inputData.mittaustiedot_2006.vuosi} (Vahanen Oy [34]), jolloin rakenne oli
     ${inputData.mittaustiedot_2006.vuosi - inputData.kohde_tiedot.rakennettu} vuotta vanha.
@@ -462,7 +505,7 @@ ${ReportGenerator._reportCSS()}
     kosteudelle vesieristyksen vuotamisesta (${inputData.kohde_tiedot.vesieristys_vuotanut_alkaen}) lähtien [2, 5, 10].
 </p>
 
-<h3><span class="chapter-num">3.2</span> Kuntotutkimus 2024</h3>
+<h3 id="ch-3-2"><span class="chapter-num">3.2</span> Kuntotutkimus 2024</h3>
 <p>
     Toinen kuntotutkimus (${inputData.mittaustiedot_2024.tutkija} [35]) tehtiin vuonna ${inputData.mittaustiedot_2024.vuosi},
     jolloin rakenne oli ${inputData.mittaustiedot_2024.vuosi - inputData.kohde_tiedot.rakennettu} vuotta vanha ja
@@ -549,7 +592,7 @@ ${ReportGenerator._reportCSS()}
     Kloridikorroosio ei ole ajankohtainen riski [5, 8, 15].
 </p>
 
-<h3><span class="chapter-num">3.3</span> Mittaustulosten vertailu ja kehityssuunta</h3>
+<h3 id="ch-3-3"><span class="chapter-num">3.3</span> Mittaustulosten vertailu ja kehityssuunta</h3>
 <p>
     Vertailtaessa vuosien 2006 ja 2024 mittaustuloksia havaitaan merkittäviä ilmiöitä:
 </p>
@@ -580,7 +623,7 @@ ${ReportGenerator._reportCSS()}
 
 <!-- ===== 4. LASKENTAMENETELMÄT ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">4</span> Laskentamenetelmät</h2>
+<h2 id="ch-4"><span class="chapter-num">4</span> Laskentamenetelmät</h2>
 
 <p>
     Käyttöikäanalyysi perustuu kolmeen rinnakkaiseen vauriomalliin, jotka yhdistetään
@@ -588,7 +631,7 @@ ${ReportGenerator._reportCSS()}
     ja JCSS Probabilistic Model Code -julkaisun [12] periaatteita palveluikäsuunnittelussa.
 </p>
 
-<h3><span class="chapter-num">4.1</span> Karbonatisaatiomalli</h3>
+<h3 id="ch-4-1"><span class="chapter-num">4.1</span> Karbonatisaatiomalli</h3>
 <p>
     Karbonatisaation etenemistä kuvataan kaksivaiheisella vaimennetulla neliöjuurimallilla [5, 7, 9, 13, 33]:
 </p>
@@ -698,7 +741,7 @@ ${ReportGenerator._reportCSS()}
     tulkintaa. Mallin suurin epävarmuus ei olekaan karbonatisaatiossa vaan tukipinnan reunarapautumisessa.
 </p>
 
-<h3><span class="chapter-num">4.2</span> Pakkasrapautumismalli</h3>
+<h3 id="ch-4-2"><span class="chapter-num">4.2</span> Pakkasrapautumismalli</h3>
 <p>
     Pakkasrapautuminen on merkittävin vauriomekanismi rakenteessa, jossa vesieristys on vuotanut
     ${2026 - inputData.kohde_tiedot.vesieristys_vuotanut_alkaen} vuotta.
@@ -800,7 +843,7 @@ ${params.frost.acceleration_factor < 1.005 ? `
     Pakkasenkestävyyden arviointiin sovelletaan by 68:n [4] ja SFS-EN 206:n [11] periaatteita.
 </p>
 
-<h3><span class="chapter-num">4.3</span> Tukipinta-analyysi (Eurokoodi 2)</h3>
+<h3 id="ch-4-3"><span class="chapter-num">4.3</span> Tukipinta-analyysi (Eurokoodi 2)</h3>
 <p>
     TT-laatan tukipinnan tehollinen pituus pienenee reunarapautumisen vuoksi [1, 6].
     Sisäreuna on osittain suojattu laatan painosta, joten reunakerroin on ${edgeFactor.toFixed(1)}
@@ -848,7 +891,7 @@ ${params.frost.acceleration_factor < 1.005 ? `
     geometrinen tarkastelu osoittaa [1, 6, 17].
 </p>
 
-<h3><span class="chapter-num">4.4</span> Mallin konservatiivisuuden arviointi</h3>
+<h3 id="ch-4-4"><span class="chapter-num">4.4</span> Mallin konservatiivisuuden arviointi</h3>
 <p>
     Sortumismalli käyttää Eurokoodi 2:n vähimmäistukipintaa (${params.tukipinta.critical_min_mm}\u00a0mm)
     sortumiskriteerinä. Tämä on <em>suunnitteluarvo uusille elementtirakenteille</em> [1], ja se
@@ -896,6 +939,7 @@ ${params.frost.acceleration_factor < 1.005 ? `
         <tr><td>A – Ei toimenpiteitä</td><td>${ReportGenerator._formatYear(s.A.collapse_risk_year)}</td><td><strong>~${formatAdjusted(adjustedMedianA)}</strong></td></tr>
         <tr><td>B – Pintaremontti</td><td>${ReportGenerator._formatYear(s.B.collapse_risk_year)}</td><td><strong>~${formatAdjusted(adjustedMedianB)}</strong></td></tr>
         <tr><td>C – Täyskorjaus</td><td>${ReportGenerator._formatYear(s.C.collapse_risk_year)}</td><td><strong>~${formatAdjusted(adjustedMedianC)}</strong></td></tr>
+        <tr><td>D – Täyskorjaus (puut säilyttäen)</td><td>${ReportGenerator._formatYear(s.D.collapse_risk_year)}</td><td><strong>~${formatAdjusted(adjustedMedianD)}</strong></td></tr>
     </tbody>
 </table>
 <p class="box-note" style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 12px; margin: 12px 0; font-size: 9pt;">
@@ -905,7 +949,7 @@ ${params.frost.acceleration_factor < 1.005 ? `
     sijoittuu todennäköisesti mallin ennusteen ja oikaistun arvion välille.
 </p>
 
-<h3><span class="chapter-num">4.5</span> Monte Carlo -simulaatio</h3>
+<h3 id="ch-4-5"><span class="chapter-num">4.5</span> Monte Carlo -simulaatio</h3>
 <p>
     Probabilistinen analyysi toteutetaan Monte Carlo -menetelmällä [12, 16], jossa simulaatio
     ajetaan ${params.monte_carlo_iterations.toLocaleString("fi-FI")} kertaa. Kullakin iteraatiolla parametrien
@@ -952,7 +996,7 @@ ${params.bayesian_conditioning?.enabled ? `
 
 <!-- ===== 5. MALLIN KALIBROINTI JA SOPIVUUS KENTTÄDATAAN ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">5</span> Mallin kalibrointi ja sopivuus kenttädataan</h2>
+<h2 id="ch-5"><span class="chapter-num">5</span> Mallin kalibrointi ja sopivuus kenttädataan</h2>
 
 <p>
     Laskentamalli on kalibroitu siten, että se tuottaa vuosien 2006 ja 2024 kuntotutkimusten
@@ -960,7 +1004,7 @@ ${params.bayesian_conditioning?.enabled ? `
     mallin pitää pystyä selittämään mennyt kehitys ennen kuin sillä voidaan ennustaa tulevaa [7, 12].
 </p>
 
-<h3><span class="chapter-num">5.1</span> Karbonatisaation sopivuus</h3>
+<h3 id="ch-5-1"><span class="chapter-num">5.1</span> Karbonatisaation sopivuus</h3>
 
 <table class="data-table">
     <thead>
@@ -999,7 +1043,7 @@ ${params.bayesian_conditioning?.enabled ? `
     kosteustilaa luotettavammin.
 </p>
 
-<h3><span class="chapter-num">5.2</span> Pakkasrapautumisen sopivuus</h3>
+<h3 id="ch-5-2"><span class="chapter-num">5.2</span> Pakkasrapautumisen sopivuus</h3>
 
 <table class="data-table">
     <thead>
@@ -1036,7 +1080,7 @@ ${params.bayesian_conditioning?.enabled ? `
     kanssa [3, 4, 14].
 </p>
 
-<h3><span class="chapter-num">5.3</span> Tukipinnan sopivuus</h3>
+<h3 id="ch-5-3"><span class="chapter-num">5.3</span> Tukipinnan sopivuus</h3>
 
 <table class="data-table">
     <thead>
@@ -1074,7 +1118,7 @@ ${params.bayesian_conditioning?.enabled ? `
     ennustuskykyä merkittävästi [1, 6].
 </p>
 
-<h3><span class="chapter-num">5.4</span> Korroosioasteen sopivuus</h3>
+<h3 id="ch-5-4"><span class="chapter-num">5.4</span> Korroosioasteen sopivuus</h3>
 ${params.bayesian_conditioning?.enabled ? `
 <p>
     Monte Carlo -simulaatiossa on sovellettu Bayesilaista ehdollistamista (ks. kohta 4.4),
@@ -1125,7 +1169,7 @@ ${params.bayesian_conditioning?.enabled ? `
 
 <!-- ===== 6. KORJAUSSKENAARIOT ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">6</span> Korjausskenaariot</h2>
+<h2 id="ch-6"><span class="chapter-num">6</span> Korjausskenaariot</h2>
 
 <table class="data-table scenario-table">
     <thead>
@@ -1134,6 +1178,7 @@ ${params.bayesian_conditioning?.enabled ? `
             <th class="sc-a">A: Passiivinen</th>
             <th class="sc-b">B: Pintaremontti</th>
             <th class="sc-c">C: Täyskorjaus</th>
+            <th class="sc-d">D: Täyskorjaus (puut)</th>
         </tr>
     </thead>
     <tbody>
@@ -1142,11 +1187,13 @@ ${params.bayesian_conditioning?.enabled ? `
             <td>Ei korjaustoimenpiteitä. Vauriot etenevät nykyisellä nopeudella.</td>
             <td>Kevyt korjaus ja piha-alueen kohennus v. ${params.current_year}. Vaahterat säilytetään.</td>
             <td>Uusi vesieristys ja rakenteellinen korjaus v. ${params.current_year}.</td>
+            <td>Uusi vesieristys ja rakenteellinen korjaus v. ${params.current_year}. Puut säilytetään erillisessä kasvualustassa.</td>
         </tr>
         <tr>
             <td class="label-cell">Pakkasrasituksen vähenemä</td>
             <td>0 %</td>
             <td>${(params.light_repair.frost_rate_reduction * 100).toFixed(0)} %</td>
+            <td>${(params.full_repair.frost_rate_reduction * 100).toFixed(0)} %</td>
             <td>${(params.full_repair.frost_rate_reduction * 100).toFixed(0)} %</td>
         </tr>
         <tr>
@@ -1154,27 +1201,37 @@ ${params.bayesian_conditioning?.enabled ? `
             <td>Ei vaikutusta</td>
             <td>Tauko ${params.light_repair.carbonation_pause_years} vuotta</td>
             <td>k-kerroin −${(params.full_repair.carbonation_k_reduction * 100).toFixed(0)} %</td>
+            <td>k-kerroin −${(params.full_repair.carbonation_k_reduction * 100).toFixed(0)} %</td>
         </tr>
         <tr>
             <td class="label-cell">Arvioitu kustannus</td>
             <td>0 €</td>
             <td>${(params.light_repair.cost_total_min_eur / 1000).toFixed(0)}–${(params.light_repair.cost_total_max_eur / 1000).toFixed(0)} t€</td>
             <td>${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur / 1e6).toFixed(1)}–${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur / 1e6).toFixed(1)} milj. € (kilpailutettu)</td>
+            <td>~${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur * 0.9 / 1e6).toFixed(1)}–${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur * 0.9 / 1e6).toFixed(1)} milj. € (~10 % vähemmän)</td>
         </tr>
         <tr>
             <td class="label-cell">Lisäkäyttöikä (tavoite)</td>
             <td>—</td>
             <td>Rajoitettu</td>
             <td>${params.full_repair.extended_life_years} vuotta</td>
+            <td>${params.full_repair.extended_life_years} vuotta</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Pihakannen vaahterat</td>
+            <td>Säilytetään</td>
+            <td>Säilytetään</td>
+            <td>Kaadetaan (hankesuunnitelma)</td>
+            <td>Säilytetään (erillinen kasvualusta)</td>
         </tr>
     </tbody>
 </table>
 
 <!-- ===== 7. SIMULAATIOTULOKSET ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">7</span> Simulaatiotulokset</h2>
+<h2 id="ch-7"><span class="chapter-num">7</span> Simulaatiotulokset</h2>
 
-<h3><span class="chapter-num">7.1</span> Skenaarioiden yhteenveto</h3>
+<h3 id="ch-7-1"><span class="chapter-num">7.1</span> Skenaarioiden yhteenveto</h3>
 
 <table class="data-table results-summary">
     <thead>
@@ -1183,6 +1240,7 @@ ${params.bayesian_conditioning?.enabled ? `
             <th class="sc-a">A: Passiivinen</th>
             <th class="sc-b">B: Pintaremontti</th>
             <th class="sc-c">C: Täyskorjaus</th>
+            <th class="sc-d">D: Täyskorjaus (puut)</th>
         </tr>
     </thead>
     <tbody>
@@ -1191,88 +1249,102 @@ ${params.bayesian_conditioning?.enabled ? `
             <td class="sc-a">${ReportGenerator._formatYear(s.A.collapse_risk_year)}</td>
             <td class="sc-b">${ReportGenerator._formatYear(s.B.collapse_risk_year)}</td>
             <td class="sc-c">${ReportGenerator._formatYear(s.C.collapse_risk_year)}</td>
+            <td class="sc-d">${ReportGenerator._formatYear(s.D.collapse_risk_year)}</td>
         </tr>
         <tr>
             <td class="label-cell">90 % luottamusväli</td>
             <td class="sc-a">${ReportGenerator._formatConfInterval(s.A.collapse_risk_year)}</td>
             <td class="sc-b">${ReportGenerator._formatConfInterval(s.B.collapse_risk_year)}</td>
             <td class="sc-c">${ReportGenerator._formatConfInterval(s.C.collapse_risk_year)}</td>
+            <td class="sc-d">${ReportGenerator._formatConfInterval(s.D.collapse_risk_year)}</td>
         </tr>
         <tr>
             <td class="label-cell">Korroosion alkamisvuosi (mediaani)</td>
             <td>${ReportGenerator._formatYear(s.A.corrosion_initiation_year, params.monte_carlo_iterations)}</td>
             <td>${ReportGenerator._formatYear(s.B.corrosion_initiation_year, params.monte_carlo_iterations)}</td>
             <td>${ReportGenerator._formatYear(s.C.corrosion_initiation_year, params.monte_carlo_iterations)}</td>
+            <td>${ReportGenerator._formatYear(s.D.corrosion_initiation_year, params.monte_carlo_iterations)}</td>
         </tr>
         <tr>
             <td class="label-cell">Havaittu korroosioaste 2024</td>
-            <td colspan="3" style="text-align: center;">0\u20131 % (pilarit 1 %, TT-laippa 0 %, TT-ripa 1 %)</td>
+            <td colspan="4" style="text-align: center;">0\u20131 % (pilarit 1 %, TT-laippa 0 %, TT-ripa 1 %)</td>
         </tr>
         <tr>
             <td class="label-cell">Kriittinen pakkasvaurio (mediaani)</td>
             <td>${ReportGenerator._formatYear(s.A.critical_frost_year, params.monte_carlo_iterations)}</td>
             <td>${ReportGenerator._formatYear(s.B.critical_frost_year, params.monte_carlo_iterations)}</td>
             <td>${ReportGenerator._formatYear(s.C.critical_frost_year, params.monte_carlo_iterations)}</td>
+            <td>${ReportGenerator._formatYear(s.D.critical_frost_year, params.monte_carlo_iterations)}</td>
         </tr>
         <tr>
             <td class="label-cell">EC2-raja alittuu 2030</td>
             <td class="sc-a">${((s.A.collapse_prob_2030 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-b">${((s.B.collapse_prob_2030 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-c">${((s.C.collapse_prob_2030 || 0) * 100).toFixed(1)} %</td>
+            <td class="sc-d">${((s.D.collapse_prob_2030 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">EC2-raja alittuu 2035</td>
             <td class="sc-a">${((s.A.collapse_prob_2035 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-b">${((s.B.collapse_prob_2035 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-c">${((s.C.collapse_prob_2035 || 0) * 100).toFixed(1)} %</td>
+            <td class="sc-d">${((s.D.collapse_prob_2035 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">EC2-raja alittuu 2040</td>
             <td class="sc-a">${((s.A.collapse_prob_2040 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-b">${((s.B.collapse_prob_2040 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-c">${((s.C.collapse_prob_2040 || 0) * 100).toFixed(1)} %</td>
+            <td class="sc-d">${((s.D.collapse_prob_2040 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">EC2-raja alittuu 2050</td>
             <td class="sc-a">${((s.A.collapse_prob_2050 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-b">${((s.B.collapse_prob_2050 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-c">${((s.C.collapse_prob_2050 || 0) * 100).toFixed(1)} %</td>
+            <td class="sc-d">${((s.D.collapse_prob_2050 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">EC2-raja alittuu 2075</td>
             <td class="sc-a">${((s.A.collapse_prob_2075 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-b">${((s.B.collapse_prob_2075 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-c">${((s.C.collapse_prob_2075 || 0) * 100).toFixed(1)} %</td>
+            <td class="sc-d">${((s.D.collapse_prob_2075 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">EC2-raja alittuu 2100</td>
             <td class="sc-a">${((s.A.collapse_prob_2100 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-b">${((s.B.collapse_prob_2100 || 0) * 100).toFixed(1)} %</td>
             <td class="sc-c">${((s.C.collapse_prob_2100 || 0) * 100).toFixed(1)} %</td>
+            <td class="sc-d">${((s.D.collapse_prob_2100 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">Korroosioriski 2035</td>
             <td>${((s.A.corrosion_prob_2035 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.B.corrosion_prob_2035 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.C.corrosion_prob_2035 || 0) * 100).toFixed(1)} %</td>
+            <td>${((s.D.corrosion_prob_2035 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">Korroosioriski 2050</td>
             <td>${((s.A.corrosion_prob_2050 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.B.corrosion_prob_2050 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.C.corrosion_prob_2050 || 0) * 100).toFixed(1)} %</td>
+            <td>${((s.D.corrosion_prob_2050 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">Korroosioriski 2075</td>
             <td>${((s.A.corrosion_prob_2075 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.B.corrosion_prob_2075 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.C.corrosion_prob_2075 || 0) * 100).toFixed(1)} %</td>
+            <td>${((s.D.corrosion_prob_2075 || 0) * 100).toFixed(1)} %</td>
         </tr>
         <tr>
             <td class="label-cell">Korroosioriski 2100</td>
             <td>${((s.A.corrosion_prob_2100 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.B.corrosion_prob_2100 || 0) * 100).toFixed(1)} %</td>
             <td>${((s.C.corrosion_prob_2100 || 0) * 100).toFixed(1)} %</td>
+            <td>${((s.D.corrosion_prob_2100 || 0) * 100).toFixed(1)} %</td>
         </tr>
     </tbody>
 </table>
@@ -1283,7 +1355,7 @@ ${params.bayesian_conditioning?.enabled ? `
 </p>
 
 <!-- Charts -->
-<h3><span class="chapter-num">7.2</span> Karbonatisaation eteneminen</h3>
+<h3 id="ch-7-2"><span class="chapter-num">7.2</span> Karbonatisaation eteneminen</h3>
 <p>
     Kuva 1 esittää karbonatisaatiosyvyyden etenemisen eri skenaarioissa. Luottamusvyöhyke
     (P5&ndash;P95) kuvastaa materiaalien ominaisuuksien hajontaa. Viitelinja osoittaa TT-laatan
@@ -1310,7 +1382,7 @@ ${params.bayesian_conditioning?.enabled ? `
 </p>
 ${ReportGenerator._chartImage(chartImages, "chart-carbonation", "Kuva 1. Karbonatisaation eteneminen (TT-ripa)")}
 
-<h3><span class="chapter-num">7.3</span> Pakkasrapautumisen kertymä</h3>
+<h3 id="ch-7-3"><span class="chapter-num">7.3</span> Pakkasrapautumisen kertymä</h3>
 <p>
     Kuva 2 esittää pakkasrapautumisen kumulatiivisen kertymän.
     ${params.frost.acceleration_factor >= 1.005
@@ -1322,13 +1394,13 @@ ${ReportGenerator._chartImage(chartImages, "chart-carbonation", "Kuva 1. Karbona
         : 'Skenaario A:ssa kriittinen raja saavutetaan simulaatiojakson loppupuolella.'}
     Leveä luottamusväli (CoV = ${(params.frost.rate_cov * 100).toFixed(0)} %) heijastaa suurta paikallista
     vaihtelua &mdash; rakennuksen kuivemmissa osissa rapautuminen on hyvin vähäistä, kun taas
-    vesivuotokohdissa se on merkittävästi keskiarvoa nopeampaa. Skenaario C:ssä pakkasrasitus
+    vesivuotokohdissa se on merkittävästi keskiarvoa nopeampaa. Skenaarioissa C ja D pakkasrasitus
     lähes pysähtyy korjauksen jälkeen [3, 4].
 </p>
 ${ReportGenerator._chartImage(chartImages, "chart-frost", "Kuva 2. Pakkasrapautumisen kumulatiivinen kertymä")}
 
 <div class="page-break"></div>
-<h3><span class="chapter-num">7.4</span> Tukipinnan tehollinen pituus</h3>
+<h3 id="ch-7-4"><span class="chapter-num">7.4</span> Tukipinnan tehollinen pituus</h3>
 <p>
     Kuva 3 esittää TT-laatan tukipinnan tehollisen pituuden pienenemisen. Alkuarvo on
     ${params.tukipinta.original_depth_mm} mm (TT:n todellinen tukipinta leukapalkilla,
@@ -1339,7 +1411,7 @@ ${ReportGenerator._chartImage(chartImages, "chart-frost", "Kuva 2. Pakkasrapautu
 </p>
 ${ReportGenerator._chartImage(chartImages, "chart-bearing", "Kuva 3. TT-laatan tukipinnan tehollinen pituus")}
 
-<h3><span class="chapter-num">7.5</span> EC2-vähimmäistukipinnan alituksen todennäköisyys</h3>
+<h3 id="ch-7-5"><span class="chapter-num">7.5</span> EC2-vähimmäistukipinnan alituksen todennäköisyys</h3>
 <p>
     Kuva 4 esittää todennäköisyyden, että TT-laatan tukipinnan tehollinen pituus alittaa
     Eurokoodi 2:n vähimmäisvaatimuksen uusille rakenteille (${params.tukipinta.critical_min_mm}&nbsp;mm) [1,&nbsp;6].
@@ -1351,7 +1423,7 @@ ${ReportGenerator._chartImage(chartImages, "chart-bearing", "Kuva 3. TT-laatan t
 ${ReportGenerator._chartImage(chartImages, "chart-collapse-prob", "Kuva 4. EC2-vähimmäistukipinnan alituksen todennäköisyys")}
 
 <div class="page-break"></div>
-<h3><span class="chapter-num">7.6</span> Korroosion todennäköisyys</h3>
+<h3 id="ch-7-6"><span class="chapter-num">7.6</span> Korroosion todennäköisyys</h3>
 <p>
     Kuva 5 esittää raudoitteen korroosion alkamistodennäköisyyden TT-laatan rivalle.
     Korroosion alkaminen ei vielä suoraan tarkoita rakenteellista vaaraa, mutta se
@@ -1382,7 +1454,7 @@ ${ReportGenerator._chartImage(chartImages, "chart-collapse-prob", "Kuva 4. EC2-v
 </p>
 ${ReportGenerator._chartImage(chartImages, "chart-corrosion-prob", "Kuva 5. Korroosion alkamistodennäköisyys (TT-ripa)")}
 
-<h3><span class="chapter-num">7.7</span> Rakenneosakohtainen analyysi</h3>
+<h3 id="ch-7-7"><span class="chapter-num">7.7</span> Rakenneosakohtainen analyysi</h3>
 <p>
     Kuvat 6 ja 7 esittävät korroosion alkamisvuoden jakauman rakenneosittain sekä
     EC2-rajan alitusajankohdan jakauman skenaarioittain. TT-laatan ripa on kriittisin
@@ -1393,9 +1465,9 @@ ${ReportGenerator._chartImage(chartImages, "chart-element-histogram", "Kuva 6. K
 ${ReportGenerator._chartImage(chartImages, "chart-collapse-histogram", "Kuva 7. EC2-rajan alitusajankohdan jakauma skenaarioittain")}
 
 <div class="page-break"></div>
-<h3><span class="chapter-num">7.8</span> Skenaariovertailu</h3>
+<h3 id="ch-7-8"><span class="chapter-num">7.8</span> Skenaariovertailu</h3>
 <p>
-    Kuva 8 esittää tutkadiagrammin, joka vertailee kolmea skenaariota viiden tunnusluvun
+    Kuva 8 esittää tutkadiagrammin, joka vertailee neljää skenaariota viiden tunnusluvun
     suhteen. Suurempi arvo tarkoittaa suurempaa riskiä (paitsi "Käyttöikä jäljellä",
     jossa suurempi arvo on parempi).
 </p>
@@ -1403,13 +1475,13 @@ ${ReportGenerator._chartImage(chartImages, "chart-radar", "Kuva 8. Skenaarioiden
 
 <!-- ===== 8. HIILIJALANJÄLKIANALYYSI ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">8</span> Hiilijalanjälkianalyysi</h2>
+<h2 id="ch-8"><span class="chapter-num">8</span> Hiilijalanjälkianalyysi</h2>
 
 ${ReportGenerator._co2Chapter(inputData)}
 
 <!-- ===== 9. VUOSIKOHTAISET TULOKSET ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">9</span> Vuosikohtaiset tulokset</h2>
+<h2 id="ch-9"><span class="chapter-num">9</span> Vuosikohtaiset tulokset</h2>
 <p>
     Taulukko esittää keskeisten tunnuslukujen mediaaniarvot valituilla tarkasteluvuosilla.
     Pakkasrapautuma (mm), tukipinnan tehollinen pituus (mm) ja EC2-rajan alitustodennäköisyys (%)
@@ -1425,7 +1497,7 @@ ${ReportGenerator._carbonationTable(results, params)}
 
 <!-- ===== 10. LASKENNAN LUOTETTAVUUS ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">10</span> Laskennan luotettavuus</h2>
+<h2 id="ch-10"><span class="chapter-num">10</span> Laskennan luotettavuus</h2>
 
 <p>
     Tämä osio arvioi laskentamallin luotettavuutta kolmesta näkökulmasta: tieteellinen perusta,
@@ -1433,7 +1505,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     Tavoitteena on antaa lukijalle edellytykset arvioida, kuinka paljon esitettyihin tuloksiin voi luottaa.
 </p>
 
-<h3><span class="chapter-num">10.1</span> Tieteellinen perusta ja kirjallisuus</h3>
+<h3 id="ch-10-1"><span class="chapter-num">10.1</span> Tieteellinen perusta ja kirjallisuus</h3>
 
 <p>
     Laskentamalli ei ole ad hoc -ratkaisu, vaan se perustuu rakennusalan vakiintuneisiin
@@ -1495,7 +1567,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     standardeja, väitöskirjoja ja vertaisarvioituja tieteellisiä julkaisuja.
 </p>
 
-<h3><span class="chapter-num">10.2</span> Kalibrointi 50 vuoden kenttädataan</h3>
+<h3 id="ch-10-2"><span class="chapter-num">10.2</span> Kalibrointi 50 vuoden kenttädataan</h3>
 
 <p>
     Mallin luotettavuuden kannalta ratkaisevaa on, että se on sovitettu kohdekohtaiseen
@@ -1536,7 +1608,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     johdonmukaisesti.
 </p>
 
-<h3><span class="chapter-num">10.3</span> Monte Carlo -simulaation luotettavuus</h3>
+<h3 id="ch-10-3"><span class="chapter-num">10.3</span> Monte Carlo -simulaation luotettavuus</h3>
 
 <p>
     Monte Carlo -menetelmä on laajalti käytetty ja hyväksytty tapa käsitellä
@@ -1583,7 +1655,7 @@ ${ReportGenerator._carbonationTable(results, params)}
     suosittelema menetelmä käyttöikäsuunnittelussa.
 </p>
 
-<h3><span class="chapter-num">10.4</span> Rajoitukset ja epävarmuustekijät</h3>
+<h3 id="ch-10-4"><span class="chapter-num">10.4</span> Rajoitukset ja epävarmuustekijät</h3>
 
 <p>
     Vaikka malli on kalibroitu kenttädataan ja perustuu vakiintuneisiin tieteellisiin
@@ -1621,13 +1693,13 @@ ${ReportGenerator._carbonationTable(results, params)}
 
 <!-- ===== 11. JOHTOPÄÄTÖKSET JA SUOSITUKSET ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">11</span> Johtopäätökset ja suositukset</h2>
+<h2 id="ch-11"><span class="chapter-num">11</span> Johtopäätökset ja suositukset</h2>
 
 ${ReportGenerator._conclusions(results, params, inputData)}
 
 <!-- ===== 12. LÄHDELUETTELO ===== -->
 <div class="page-break"></div>
-<h2><span class="chapter-num">12</span> Lähdeluettelo</h2>
+<h2 id="ch-12"><span class="chapter-num">12</span> Lähdeluettelo</h2>
 
 <ol class="references">
     <li id="ref-1">
@@ -1900,11 +1972,13 @@ ${ReportGenerator._conclusions(results, params, inputData)}
             <th colspan="3" class="sc-a">Skenaario A</th>
             <th colspan="3" class="sc-b">Skenaario B</th>
             <th colspan="3" class="sc-c">Skenaario C</th>
+            <th colspan="3" class="sc-d">Skenaario D</th>
         </tr>
         <tr>
             <th class="sc-a">Pakkas (mm)</th><th class="sc-a">Tuki (mm)</th><th class="sc-a">EC2 %</th>
             <th class="sc-b">Pakkas (mm)</th><th class="sc-b">Tuki (mm)</th><th class="sc-b">EC2 %</th>
             <th class="sc-c">Pakkas (mm)</th><th class="sc-c">Tuki (mm)</th><th class="sc-c">EC2 %</th>
+            <th class="sc-d">Pakkas (mm)</th><th class="sc-d">Tuki (mm)</th><th class="sc-d">EC2 %</th>
         </tr>
     </thead>
     <tbody>`;
@@ -1914,7 +1988,7 @@ ${ReportGenerator._conclusions(results, params, inputData)}
             if (yi < 0) continue;
 
             html += `<tr><td class="year-cell">${year}</td>`;
-            for (const scId of ["A", "B", "C"]) {
+            for (const scId of ["A", "B", "C", "D"]) {
                 const st = results.scenarios[scId].stats[yi];
                 const frostVal = st.frost.median.toFixed(1);
                 const bearVal = st.bearing.median.toFixed(0);
@@ -1942,13 +2016,14 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         <tr>
             <th rowspan="2">Vuosi</th>
             <th>Skenaario A</th>
-            <th colspan="3">Korroosioriski (%)</th>
+            <th colspan="4">Korroosioriski (%)</th>
         </tr>
         <tr>
             <th class="sc-a">Karb. (mm)</th>
             <th class="sc-a">A</th>
             <th class="sc-b">B</th>
             <th class="sc-c">C</th>
+            <th class="sc-d">D</th>
         </tr>
     </thead>
     <tbody>`;
@@ -1960,16 +2035,19 @@ ${ReportGenerator._conclusions(results, params, inputData)}
             const stA = results.scenarios.A.stats[yi];
             const stB = results.scenarios.B.stats[yi];
             const stC = results.scenarios.C.stats[yi];
+            const stD = results.scenarios.D.stats[yi];
             const carbVal = stA.carbonation.median.toFixed(1);
             const corrA = (stA.corrosion_probability * 100).toFixed(1);
             const corrB = (stB.corrosion_probability * 100).toFixed(1);
             const corrC = (stC.corrosion_probability * 100).toFixed(1);
+            const corrD = (stD.corrosion_probability * 100).toFixed(1);
 
             html += `<tr><td class="year-cell">${year}</td>`;
             html += `<td>${carbVal}</td>`;
             html += `<td>${corrA} %</td>`;
             html += `<td>${corrB} %</td>`;
             html += `<td>${corrC} %</td>`;
+            html += `<td>${corrD} %</td>`;
             html += `</tr>`;
         }
 
@@ -1984,10 +2062,12 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         const collapseA = s.A.collapse_risk_year;
         const collapseB = s.B.collapse_risk_year;
         const collapseC = s.C.collapse_risk_year;
+        const collapseD = s.D.collapse_risk_year;
 
         const risk2035A = ((s.A.collapse_prob_2035 || 0) * 100).toFixed(1);
         const risk2035B = ((s.B.collapse_prob_2035 || 0) * 100).toFixed(1);
         const risk2035C = ((s.C.collapse_prob_2035 || 0) * 100).toFixed(1);
+        const risk2035D = ((s.D.collapse_prob_2035 || 0) * 100).toFixed(1);
         const risk2050A = ((s.A.collapse_prob_2050 || 0) * 100).toFixed(1);
 
         const ageYears = 2026 - inputData.kohde_tiedot.rakennettu;
@@ -2008,6 +2088,7 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         const adjustedMedianA = adjustYear(collapseA?.median);
         const adjustedMedianB = adjustYear(collapseB?.median);
         const adjustedMedianC = adjustYear(collapseC?.median);
+        const adjustedMedianD = adjustYear(collapseD?.median);
 
         function formatAdjusted(year) {
             if (!year) return '\u2014';
@@ -2056,7 +2137,8 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     50\u00a0mm (${params.tukipinta.critical_min_mm}\u00a0mm:n sijaan), antavat mediaaniajoiksi:
     A:\u00a0<strong>~${formatAdjusted(adjustedMedianA)}</strong>,
     B:\u00a0<strong>~${formatAdjusted(adjustedMedianB)}</strong>,
-    C:\u00a0<strong>~${formatAdjusted(adjustedMedianC)}</strong>
+    C:\u00a0<strong>~${formatAdjusted(adjustedMedianC)}</strong>,
+    D:\u00a0<strong>~${formatAdjusted(adjustedMedianD)}</strong>
     (ks. luku 4.4).
 </p>
 
@@ -2090,24 +2172,35 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         Hallituksen hankesuunnitelmassa pihakannen vaahterat kaadetaan, vaikka vaahtereiden
         kaatamiselle ei ole asiallista syytä ja korjaus on toteutettavissa myös ne säilyttäen.
     </li>
+    <li><strong>Täyskorjaus puut säilyttäen (skenaario D)</strong> tuottaa rakenteellisesti saman tuloksen kuin skenaario C:
+        EC2-rajan alituksen mediaani on ${ReportGenerator._formatYear(collapseD)}
+        ${!isNaN(collapseD.p5) && collapseD.n > 0 ? `(90 % luottamusväli: ${Math.round(collapseD.p5)}\u2013${Math.round(collapseD.p95)})` : ''}.
+        Oikaistu arvio on ~${formatAdjusted(adjustedMedianD)}.
+        Kustannus on noin 10\u00a0% pienempi kuin skenaariossa C, koska puualuetta (~156\u00a0m\u00b2) ei tarvitse purkaa.
+        Pihakannen vaahterat säilytetään erillisessä kasvualustassa (syvyys 1\u20131,5\u00a0m, mitoitettu 4 puulle).
+        Patolevy-vaihtoehto suojaa rakenteita juuristolta. Kaupunkikuvallinen arvo ja hiilinielu säilyvät.
+    </li>
 </ol>
 <p>
-    Pintaremontti (skenaario B) tuottaa täyskorjausta (skenaario C) viihtyisämmän ja vihreämmän
-    lopputuloksen, koska pihakannen suuret vaahterat &mdash; Itä-Pasilan suurimmat puut &mdash;
-    säilytetään ja piha-alueen istutuksia kohennetaan. Hallituksen hankesuunnitelmassa täyskorjaus
-    edellyttää vaahtereiden kaatamista, minkä jälkeen piha-alueen palautuminen nykyiselle
-    vihreystasolle veisi vuosikymmeniä. Vaahtereiden kaatamiselle ei ole rakenteellista
-    eikä muutakaan asiallista syytä &mdash; koko vesieristeen uusimisen sisältävä remontti
-    on toteutettavissa myös vaahterat säilyttäen.
+    Skenaariot B ja D säilyttävät pihakannen suuret vaahterat &mdash; Itä-Pasilan suurimmat puut.
+    Skenaario D (täyskorjaus puut säilyttäen) yhdistää täyskorjauksen rakenteelliset hyödyt
+    puuston säilyttämiseen ja on noin 10\u00a0% edullisempi kuin C. Hallituksen hankesuunnitelmassa
+    (skenaario C) täyskorjaus edellyttää vaahtereiden kaatamista, minkä jälkeen piha-alueen
+    palautuminen nykyiselle vihreystasolle veisi vuosikymmeniä. Vaahtereiden kaatamiselle ei ole
+    rakenteellista eikä muutakaan asiallista syytä &mdash; koko vesieristeen uusimisen sisältävä
+    remontti on toteutettavissa myös vaahterat säilyttäen (skenaario D).
 </p>
 
 <h3>Hiilijalanjälki</h3>
 <p>
     Skenaarioiden ympäristövaikutukset eroavat merkittävästi (ks. luku 8):
     passiivisen vaihtoehdon (A) nettovaikutus on negatiivinen (\u2212${Math.abs(calculateCO2Emissions(inputData).A.netto_t).toFixed(1)}\u00a0t CO\u2082,
-    puuston ansiosta), pintaremontin (B) nettopäästöt ovat ~${calculateCO2Emissions(inputData).B.netto_t}\u00a0t CO\u2082
-    ja täyskorjauksen (C) ~${calculateCO2Emissions(inputData).C.netto_t}\u00a0t CO\u2082.
-    Täyskorjauksen hiilijalanjälkeä kasvattaa merkittävästi pihakannen vaahtereiden kaataminen,
+    puuston ansiosta), pintaremontin (B) nettopäästöt ovat ~${calculateCO2Emissions(inputData).B.netto_t}\u00a0t CO\u2082,
+    täyskorjauksen (C) ~${calculateCO2Emissions(inputData).C.netto_t}\u00a0t CO\u2082
+    ja täyskorjauksen puut säilyttäen (D) ~${calculateCO2Emissions(inputData).D.netto_t}\u00a0t CO\u2082.
+    Skenaario D:n päästöt ovat huomattavasti pienemmät kuin C:n, koska puuston hiilinielu säilyy
+    ja rakennuspäästöt ovat noin 10\u00a0% pienemmät.
+    Skenaariossa C hiilijalanjälkeä kasvattaa merkittävästi pihakannen vaahtereiden kaataminen,
     joka vapauttaa puiden hiilivaraston ja lopettaa vuotuisen hiilensidonnan [41, 42].
 </p>
 
@@ -2132,7 +2225,9 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     hankesuunnitelmassa täyskorjaus (skenaario C) edellyttäisi pihakannen kahden suuren vaahteran
     kaatamista &mdash; puut ovat Itä-Pasilan suurimmat ja kuusikerroksisen kerrostalon korkuiset.
     Vaahtereiden kaatamiselle ei ole asiallista syytä: vesieristeen uusimisen sisältävä
-    täyskorjaus on toteutettavissa myös vaahterat säilyttäen.
+    täyskorjaus on toteutettavissa myös vaahterat säilyttäen (skenaario D).
+    Skenaario D tuottaa rakenteellisesti saman tuloksen kuin C, mutta on noin 10\u00a0%
+    edullisempi ja säilyttää puuston hiilinielun.
 </p>
 
 <h3>Suositukset</h3>
@@ -2155,7 +2250,11 @@ ${ReportGenerator._conclusions(results, params, inputData)}
         voi olla kustannustehokas vaihtoehto, joka samalla kohentaa piha-alueen yleisilmettä
         ja säilyttää pihakannen vaahterat.
         Täyskorjauksen kilpailutettu kustannusarvio on
-        ${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur / 1e6).toFixed(1)} milj. \u20ac.</li>
+        ${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur / 1e6).toFixed(1)} milj. \u20ac.
+        Mikäli täyskorjaus toteutetaan, skenaario D (puut säilyttäen,
+        ~${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_min_eur * 0.9 / 1e6).toFixed(1)}\u2013${(inputData.mittaustiedot_2024.toteutunut_kustannusarvio_max_eur * 0.9 / 1e6).toFixed(1)} milj. \u20ac)
+        on suositeltava vaihtoehto, koska se on edullisempi, säilyttää pihakannen
+        vaahterat ja tuottaa rakenteellisesti saman lopputuloksen.</li>
     <li><strong>Sadevesikaivojen huolto ja pintakuivatus:</strong> Vuoden 2024 kuntotutkimuksessa [35] havaittiin,
         että pihakannen sadevesikaivojen vedenpoisto oli estynyt: kaivot olivat tutkimushetkellä
         täynnä vettä, vaikka viimeisestä sateesta oli kulunut noin 4 vuorokautta (Contrust Oy, kohta 5.2).
@@ -2201,7 +2300,7 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     julkisiin tietokantoihin [37, 38, 39, 40] ja puustotutkimuksiin [41, 42].
 </p>
 
-<h3><span class="chapter-num">8.1</span> Päästökertoimet</h3>
+<h3 id="ch-8-1"><span class="chapter-num">8.1</span> Päästökertoimet</h3>
 <table class="data-table" style="margin: 12px 0;">
     <thead>
         <tr>
@@ -2223,7 +2322,7 @@ ${ReportGenerator._conclusions(results, params, inputData)}
     </tbody>
 </table>
 
-<h3><span class="chapter-num">8.2</span> Skenaariokohtaiset päästöt</h3>
+<h3 id="ch-8-2"><span class="chapter-num">8.2</span> Skenaariokohtaiset päästöt</h3>
 
 <table class="data-table" style="margin: 12px 0;">
     <thead>
@@ -2253,6 +2352,12 @@ ${ReportGenerator._conclusions(results, params, inputData)}
             <td>+${(co2.C.puusto_kg / 1000).toFixed(1)} t (hiili vapautuu)</td>
             <td><strong>~${co2.C.netto_t} t</strong></td>
         </tr>
+        <tr>
+            <td style="text-align:left;"><strong>D: Täyskorjaus (puut säilyttäen)</strong></td>
+            <td>~${(co2.D.rakentaminen_kg / 1000).toFixed(0)} t</td>
+            <td>\u2212${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} t (puut sitovat)</td>
+            <td><strong>~${co2.D.netto_t} t</strong></td>
+        </tr>
     </tbody>
 </table>
 
@@ -2266,7 +2371,12 @@ ${co2.B.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`)
 ${co2.C.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`).join('\n')}
 </ul>
 
-<h3><span class="chapter-num">8.3</span> Vertailu ja havainnollistaminen</h3>
+<p style="margin-top: 8px;"><strong>Skenaario D:n erittely:</strong></p>
+<ul>
+${co2.D.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`).join('\n')}
+</ul>
+
+<h3 id="ch-8-3"><span class="chapter-num">8.3</span> Vertailu ja havainnollistaminen</h3>
 <p>
     Päästöjen suuruusluokkaa voi havainnollistaa arkipäiväisillä vertauksilla:
 </p>
@@ -2276,6 +2386,7 @@ ${co2.C.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`)
             <th style="text-align:left;">Vertailu</th>
             <th>B: Pintaremontti</th>
             <th>C: Täyskorjaus</th>
+            <th>D: Täyskorjaus (puut)</th>
         </tr>
     </thead>
     <tbody>
@@ -2283,21 +2394,24 @@ ${co2.C.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`)
             <td style="text-align:left;">Helsinki\u2013Pariisi-lentoja (~${v.lento_hki_pariisi_kg} kg CO\u2082e/lento) [40]</td>
             <td>\u2248 ${co2.B.vertaukset.lennot_hki_pariisi} lentoa</td>
             <td>\u2248 ${co2.C.vertaukset.lennot_hki_pariisi} lentoa</td>
+            <td>\u2248 ${co2.D.vertaukset.lennot_hki_pariisi} lentoa</td>
         </tr>
         <tr>
             <td style="text-align:left;">Henkilöauton ajokilometrit (${v.auto_kg_per_km} kg/km) [37]</td>
             <td>\u2248 ${(co2.B.vertaukset.autoilu_km / 1000).toFixed(0)}\u00a0000 km</td>
             <td>\u2248 ${(co2.C.vertaukset.autoilu_km / 1000).toFixed(0)}\u00a0000 km</td>
+            <td>\u2248 ${(co2.D.vertaukset.autoilu_km / 1000).toFixed(0)}\u00a0000 km</td>
         </tr>
         <tr>
             <td style="text-align:left;">Keskivertosuomalaisen autoiluvuosia (~${v.suomalainen_autoilu_kg_per_v} kg/v)</td>
             <td>\u2248 ${co2.B.vertaukset.autoilu_vuodet} v</td>
             <td>\u2248 ${co2.C.vertaukset.autoilu_vuodet} v</td>
+            <td>\u2248 ${co2.D.vertaukset.autoilu_vuodet} v</td>
         </tr>
     </tbody>
 </table>
 
-<h3><span class="chapter-num">8.4</span> Puuston merkitys hiilitaseessa</h3>
+<h3 id="ch-8-4"><span class="chapter-num">8.4</span> Puuston merkitys hiilitaseessa</h3>
 <p>
     Pihakannen kaksi suurta vaahterat ovat Itä-Pasilan suurimmat puut ja noin kuusikerroksisen
     kerrostalon korkuiset. Kukin puu varastoi arviolta noin ${CO2_FACTORS.puusto.iso_vaahtera_hiilivarasto_kg} kg hiiltä
@@ -2306,7 +2420,7 @@ ${co2.C.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`)
     ${CO2_FACTORS.puusto.puita_kpl * CO2_FACTORS.puusto.vuotuinen_sidonta_kg_co2} kg CO\u2082:ta [42].
 </p>
 <p>
-    Skenaariossa A ja B vaahterat säilytetään, jolloin ne jatkavat hiilensidontataan koko
+    Skenaarioissa A, B ja D vaahterat säilytetään, jolloin ne jatkavat hiilensidontataan koko
     elinaikansa. 30 vuodessa puiden nettosidonta on yhteensä noin ${(co2.puusto_30v.sidonta_kg / 1000).toFixed(1)} tonnia CO\u2082:ta.
 </p>
 <p>
@@ -2315,6 +2429,13 @@ ${co2.C.erittely.map(e => `    <li>${e.nimi}: ${fmtKg(e.kg)} kg CO\u2082e</li>`)
     Puuston kokonaisvaikutus skenaariossa C on noin +${(co2.C.puusto_kg / 1000).toFixed(1)} tonnia CO\u2082:ta
     30 vuoden tarkastelujaksolla. Tämä vastaa yksinään noin ${Math.round(co2.C.puusto_kg / v.lento_hki_pariisi_kg)}
     Helsinki\u2013Pariisi-lentoa.
+</p>
+<p>
+    Skenaariossa D (täyskorjaus puut säilyttäen) rakennuspäästöt ovat noin 10\u00a0% pienemmät kuin
+    skenaariossa C (puualuetta ~156\u00a0m\u00b2 ei pureta), ja puuston hiilinielu säilyy. Skenaarion D
+    nettopäästöt ovat ~${co2.D.netto_t}\u00a0t CO\u2082, kun skenaarion C nettopäästöt ovat
+    ~${co2.C.netto_t}\u00a0t CO\u2082. Ero johtuu sekä pienemmistä rakennuspäästöistä
+    että puuston hiilinielun säilymisestä.
 </p>
 <p>
     Vaahtereiden säilyttäminen on siten paitsi viihtyisyyskysymys myös merkittävä
@@ -2455,10 +2576,13 @@ body {
     padding: 5px 0;
     border-bottom: 1px dotted #e2e8f0;
     font-size: 11pt;
+    text-decoration: none;
+    color: inherit;
 }
 .toc-item.sub { padding-left: 24px; }
 .toc-num { font-weight: 600; color: #6366f1; min-width: 30px; }
 .toc-text { color: #334155; }
+.toc-item:hover .toc-text { color: #6366f1; text-decoration: underline; }
 
 /* Headings */
 h2 {
@@ -2543,9 +2667,11 @@ li { margin-bottom: 6px; }
 .sc-a { background: rgba(244, 63, 94, 0.08); }
 .sc-b { background: rgba(245, 158, 11, 0.08); }
 .sc-c { background: rgba(16, 185, 129, 0.08); }
+.sc-d { background: rgba(99, 102, 241, 0.08); }
 th.sc-a { border-bottom: 3px solid #f43f5e; }
 th.sc-b { border-bottom: 3px solid #f59e0b; }
 th.sc-c { border-bottom: 3px solid #10b981; }
+th.sc-d { border-bottom: 3px solid #6366f1; }
 
 /* Danger/warning cells */
 .danger { color: #dc2626; font-weight: 600; }
@@ -2666,6 +2792,10 @@ th.sc-c { border-bottom: 3px solid #10b981; }
 .scenario-box.sc-c-box {
     border-color: #10b981;
     background: rgba(16, 185, 129, 0.06);
+}
+.scenario-box.sc-d-box {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.06);
 }
 .scenario-box .key-metric {
     display: inline-block;

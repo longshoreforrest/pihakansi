@@ -257,8 +257,8 @@
                             ei pelkk&auml; teoreettinen arvio.
                         </p>
                         <p style="font-size: 1.1em; color: #475569; line-height: 1.7; margin-bottom: 32px;">
-                            Ohjelmisto vertailee kolmea skenaariota: nykytilan jatkamista (A), pintaremonttia (B)
-                            ja t&auml;yskorjausta (C). Jokainen simulaatioajo tuottaa tuhansia laskentapolkuja,
+                            Ohjelmisto vertailee nelj&auml;&auml; skenaariota: nykytilan jatkamista (A), pintaremonttia (B),
+                            t&auml;yskorjausta (C) ja t&auml;yskorjausta puut s&auml;ilytt&auml;en (D). Jokainen simulaatioajo tuottaa tuhansia laskentapolkuja,
                             joista johdetaan todenn&auml;k&ouml;isyydet rakenteen vaurioitumiselle eri aikapisteiss&auml;.
                         </p>
 
@@ -374,7 +374,7 @@
                     <h3 class="section-title"><span class="icon">&#128202;</span> Skenaarioiden yhteenveto</h3>
 
                     <!-- Scenario Summary Cards -->
-                    <div class="card-grid card-grid-3">
+                    <div class="card-grid card-grid-4">
 
                         <!-- Scenario A -->
                         <div class="card card-scenario-a">
@@ -499,6 +499,47 @@
                             </div>
                         </div>
 
+                        <!-- Scenario D -->
+                        <div class="card card-scenario-d">
+                            <div class="card-header">
+                                <span class="card-title">EC2-raja <span class="tag tag-d">D</span></span>
+                            </div>
+                            <div class="card-value indigo" id="scD-collapse-year">&mdash;</div>
+                            <div class="card-subtitle">T&auml;yskorjaus (puut s&auml;ilytt&auml;en) 2026</div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Korroosion alku</span>
+                                    <span class="stat-value" id="scD-corrosion-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Kriitt. pakkasvaurio</span>
+                                    <span class="stat-value" id="scD-frost-year">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2035</span>
+                                    <span class="stat-value" id="scD-risk-2035">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2050</span>
+                                    <span class="stat-value" id="scD-risk-2050">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2075</span>
+                                    <span class="stat-value" id="scD-risk-2075">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Riski 2100</span>
+                                    <span class="stat-value" id="scD-risk-2100">&mdash;</span>
+                                </div>
+                            </div>
+                            <div class="card-stats no-border">
+                                <div class="stat-item full-width">
+                                    <span class="stat-label">90% luottamusv&auml;li</span>
+                                    <span class="stat-value" id="scD-conf-interval">&mdash;</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Overview Charts: Radar + Collapse Probability -->
@@ -526,9 +567,9 @@
                     <h3 class="section-title"><span class="icon">&#128203;</span> Korjausskenaariot</h3>
 
                     <div class="info-box">
-                        Simulaatio vertailee kolmea eri toimintavaihtoehtoa vuodesta 2026 eteenpäin. Kukin skenaario
-                        vaikuttaa eri tavoin pakkasrapautumiseen, karbonatisaatioon ja tukipinnan säilymiseen.
-                        Parametrit ovat säädettävissä sivupalkista.
+                        Simulaatio vertailee nelj&auml;&auml; eri toimintavaihtoehtoa vuodesta 2026 eteenp&auml;in. Kukin skenaario
+                        vaikuttaa eri tavoin pakkasrapautumiseen, karbonatisaatioon ja tukipinnan s&auml;ilymiseen.
+                        Parametrit ovat s&auml;&auml;dett&auml;viss&auml; sivupalkista.
                     </div>
 
                     <div class="info-box waiting-statement" id="waiting-statement">
@@ -719,6 +760,70 @@
                             </div>
                         </div>
 
+                        <!-- Scenario D -->
+                        <div class="scenario-detail-card scenario-d-card">
+                            <div class="scenario-detail-header scenario-d-header">
+                                <span class="scenario-letter">D</span>
+                                <div>
+                                    <h3>T&auml;yskorjaus (puut s&auml;ilytt&auml;en)</h3>
+                                    <p class="scenario-subtitle">Uusi vesieristys, vaahterat s&auml;ilytet&auml;&auml;n v. 2026</p>
+                                </div>
+                            </div>
+
+                            <div class="scenario-detail-body">
+                                <h4>Kuvaus</h4>
+                                <p>
+                                    Teknisesti sama t&auml;yskorjaus kuin skenaariossa C, mutta pihakannen kaksi suurta
+                                    vaahterat s&auml;ilytet&auml;&auml;n. Puualue (~156&nbsp;m&sup2;) ei vaadi ty&ouml;t&auml;,
+                                    mik&auml; pienent&auml;&auml; kustannusta ~10&nbsp;%. Vaahteroilla on alunperin rakennettu
+                                    erillinen valettu kasvualusta (syvyys 1&ndash;1,5&nbsp;m), joka on mitoitettu
+                                    nelj&auml;lle puulle &mdash; nykyisin kaksi on j&auml;ljell&auml;.
+                                    Juurten suojaamiseksi vesieristeen l&auml;heisyydess&auml; voidaan k&auml;ytt&auml;&auml;
+                                    patolevyratkaisua.
+                                </p>
+
+                                <h4>Toimenpiteet</h4>
+                                <ul>
+                                    <li>Sama kuin C, paitsi puualue ohitetaan</li>
+                                    <li>Vanhan vedeneristyksen poisto ja uuden asennus (puualuetta lukuun ottamatta)</li>
+                                    <li>Vaurioituneiden betonipintojen perusteellinen korjaus</li>
+                                    <li>Korroosiovaurioiden ja paljastuneiden ter&auml;sten korjaus</li>
+                                    <li>Rakenteellinen vahvistaminen tarvittaessa</li>
+                                    <li>Patolevy juurten suojaamiseksi vesieristeen l&auml;heisyydess&auml;</li>
+                                    <li>Pihakannen vaahterat s&auml;ilytet&auml;&auml;n</li>
+                                </ul>
+
+                                <h4>Vaikutukset laskentamalliin</h4>
+                                <table class="scenario-param-table">
+                                    <tr>
+                                        <td>Pakkasrapautuminen</td>
+                                        <td>Sama kuin C (<span id="sc-d-frost-red"></span> % v&auml;henem&auml;)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Karbonatisaatio</td>
+                                        <td>Sama kuin C (k &minus;<span id="sc-d-k-red"></span> %)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tukipinnan rapautuminen</td>
+                                        <td>Sama kuin C (90 % v&auml;henem&auml;)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>K&auml;ytt&ouml;i&auml;n pidennys</td>
+                                        <td>+<span id="sc-d-life-ext"></span> vuotta korjauksesta</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Puusto</td>
+                                        <td>2 vaahterat s&auml;ilytet&auml;&auml;n (hiilinielu jatkuu)</td>
+                                    </tr>
+                                </table>
+
+                                <div class="scenario-cost">
+                                    <span class="scenario-cost-label">Kustannus</span>
+                                    <span class="scenario-cost-value">&asymp; <span id="sc-d-total-cost"></span> &euro; (~10 % v&auml;hemm&auml;n kuin C)</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Comparison table -->
@@ -731,7 +836,8 @@
                                     <th>Ominaisuus</th>
                                     <th class="th-scenario-a">A &mdash; Passiivinen</th>
                                     <th class="th-scenario-b">B &mdash; Pintaremontti</th>
-                                    <th class="th-scenario-c">C &mdash; Täyskorjaus</th>
+                                    <th class="th-scenario-c">C &mdash; T&auml;yskorjaus</th>
+                                    <th class="th-scenario-d">D &mdash; T&auml;yskorjaus (puut)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -740,72 +846,91 @@
                                     <td>&mdash;</td>
                                     <td>2026</td>
                                     <td>2026</td>
+                                    <td>2026</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Vedeneristys</strong></td>
                                     <td>Vuotaa (v. 1975 &rarr;)</td>
                                     <td>Ei muutoksia (pintarakenteiden p&auml;ivitys)</td>
                                     <td>Kokonaan uusi</td>
+                                    <td>Uusi (puualue ohitetaan)</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Betonikorjaukset</strong></td>
-                                    <td>Ei tehdä</td>
+                                    <td>Ei tehd&auml;</td>
                                     <td>Paikallinen paikkakorjaus</td>
+                                    <td>Perusteellinen kunnostus</td>
                                     <td>Perusteellinen kunnostus</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Pakkasrapaut. vähenemä</strong></td>
+                                    <td><strong>Puusto</strong></td>
+                                    <td>S&auml;ilyy</td>
+                                    <td>S&auml;ilyy</td>
+                                    <td>Kaadetaan</td>
+                                    <td>S&auml;ilytet&auml;&auml;n</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Pakkasrapaut. v&auml;henem&auml;</strong></td>
                                     <td>0 %</td>
                                     <td id="sc-comp-b-frost">&mdash;</td>
                                     <td id="sc-comp-c-frost">&mdash;</td>
+                                    <td id="sc-comp-d-frost">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Karbonatisaatiovaikutus</strong></td>
                                     <td>Ei muutosta</td>
                                     <td>Tauko 5 v</td>
                                     <td id="sc-comp-c-carb">&mdash;</td>
+                                    <td id="sc-comp-d-carb">&mdash;</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Käyttöiän pidennys</strong></td>
+                                    <td><strong>K&auml;ytt&ouml;i&auml;n pidennys</strong></td>
                                     <td>&mdash;</td>
                                     <td>Rajoitettu</td>
                                     <td id="sc-comp-c-life">&mdash;</td>
+                                    <td id="sc-comp-d-life">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Kustannus (&euro;/m&sup2;)</strong></td>
                                     <td>0</td>
                                     <td id="sc-comp-b-cost">&mdash;</td>
                                     <td id="sc-comp-c-cost">&mdash;</td>
+                                    <td id="sc-comp-d-cost">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Kokonaiskustannus</strong></td>
                                     <td>0 &euro;</td>
                                     <td id="sc-comp-b-total">&mdash;</td>
                                     <td id="sc-comp-c-total">&mdash;</td>
+                                    <td id="sc-comp-d-total">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>EC2-raja alittuu 2035</strong></td>
                                     <td id="sc-comp-a-risk2035">&mdash;</td>
                                     <td id="sc-comp-b-risk2035">&mdash;</td>
                                     <td id="sc-comp-c-risk2035">&mdash;</td>
+                                    <td id="sc-comp-d-risk2035">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>EC2-raja alittuu 2050</strong></td>
                                     <td id="sc-comp-a-risk2050">&mdash;</td>
                                     <td id="sc-comp-b-risk2050">&mdash;</td>
                                     <td id="sc-comp-c-risk2050">&mdash;</td>
+                                    <td id="sc-comp-d-risk2050">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>EC2-raja alittuu 2075</strong></td>
                                     <td id="sc-comp-a-risk2075">&mdash;</td>
                                     <td id="sc-comp-b-risk2075">&mdash;</td>
                                     <td id="sc-comp-c-risk2075">&mdash;</td>
+                                    <td id="sc-comp-d-risk2075">&mdash;</td>
                                 </tr>
                                 <tr>
                                     <td><strong>EC2-raja alittuu 2100</strong></td>
                                     <td id="sc-comp-a-risk2100">&mdash;</td>
                                     <td id="sc-comp-b-risk2100">&mdash;</td>
                                     <td id="sc-comp-c-risk2100">&mdash;</td>
+                                    <td id="sc-comp-d-risk2100">&mdash;</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -828,7 +953,7 @@
                     </div>
 
                     <!-- CO2 Summary Cards -->
-                    <div class="card-grid card-grid-3" id="co2-cards">
+                    <div class="card-grid card-grid-4" id="co2-cards">
                         <div class="card card-scenario-a">
                             <div class="card-header">
                                 <span class="card-title">CO&sub2; netto <span class="tag tag-a">A</span></span>
@@ -882,6 +1007,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="card card-scenario-d">
+                            <div class="card-header">
+                                <span class="card-title">CO&sub2; netto <span class="tag tag-d">D</span></span>
+                            </div>
+                            <div class="card-value indigo" id="co2-d-netto">&mdash;</div>
+                            <div class="card-subtitle">T&auml;yskorjaus + puusto s&auml;ilyy</div>
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Rakentaminen</span>
+                                    <span class="stat-value" id="co2-d-rak">&mdash;</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Puusto (30 v)</span>
+                                    <span class="stat-value" id="co2-d-puusto">&mdash;</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- CO2 Comparison Table -->
@@ -893,6 +1036,7 @@
                                     <th class="th-scenario-a">A &mdash; Passiivinen</th>
                                     <th class="th-scenario-b">B &mdash; Pintaremontti</th>
                                     <th class="th-scenario-c">C &mdash; T&auml;yskorjaus</th>
+                                    <th class="th-scenario-d">D &mdash; T&auml;yskorjaus (puut)</th>
                                 </tr>
                             </thead>
                             <tbody id="co2-table-body">
@@ -905,6 +1049,8 @@
                         <strong>Puuston merkitys:</strong> Pihakannen kaksi suurta vaahterat sitovat hiilidioksidia
                         koko elinaikansa. Skenaariossa C vaahterat kaadetaan, jolloin niiden hiilivarasto
                         (~3,7 t CO&sub2;) vapautuu ja vuotuinen sidonta (~30 kg CO&sub2;/v) menetet&auml;&auml;n.
+                        <strong>Skenaariossa D</strong> puut s&auml;ilytet&auml;&auml;n, jolloin hiilinielu jatkuu
+                        ja CO&sub2;-jalanj&auml;lki on merkitt&auml;v&auml;sti pienempi.
                     </div>
 
                 </div>
@@ -917,11 +1063,12 @@
                     <h3 class="section-title"><span class="icon">&#128300;</span> Vauriomekanismien analyysit</h3>
 
                     <div class="info-box">
-                        <strong>Kolme skenaariota:</strong>
+                        <strong>Nelj&auml; skenaariota:</strong>
                         A = Passiivinen (ei korjauksia),
                         B = Pintaremontti 2026,
-                        C = Täyskorjaus 2026.
-                        Luottamusvyöhykkeet esittävät P5–P95-kvantiilivälin (10 000 Monte Carlo -iteraatiota).
+                        C = T&auml;yskorjaus 2026,
+                        D = T&auml;yskorjaus puut s&auml;ilytt&auml;en 2026.
+                        Luottamusvy&ouml;hykkeet esitt&auml;v&auml;t P5&ndash;P95-kvantiiliv&auml;lin (10 000 Monte Carlo -iteraatiota).
                     </div>
 
                     <!-- Carbonation + Frost -->
@@ -1169,6 +1316,7 @@
                                     <th colspan="3" class="th-scenario-a">Skenaario A</th>
                                     <th colspan="3" class="th-scenario-b">Skenaario B</th>
                                     <th colspan="3" class="th-scenario-c">Skenaario C</th>
+                                    <th colspan="3" class="th-scenario-d">Skenaario D</th>
                                 </tr>
                                 <tr>
                                     <!-- A -->
@@ -1183,6 +1331,10 @@
                                     <th class="th-scenario-c">Pakkas (mm)</th>
                                     <th class="th-scenario-c">Tuki (mm)</th>
                                     <th class="th-scenario-c">Sort. %</th>
+                                    <!-- D -->
+                                    <th class="th-scenario-d">Pakkas (mm)</th>
+                                    <th class="th-scenario-d">Tuki (mm)</th>
+                                    <th class="th-scenario-d">Sort. %</th>
                                 </tr>
                             </thead>
                             <tbody id="results-table-body">
@@ -1319,10 +1471,13 @@
                                 <strong>B &mdash; Pintaremontti:</strong> Kevyt korjaus, piha-alueen kohennus ja autotallin
                                 estetiikan parannus v. 2026. Pakkasrapautumisnopeus puolittuu, karbonatisaatio pysähtyy
                                 5 vuodeksi. Vaahterat säilytetään.<br>
-                                <strong>C &mdash; Täyskorjaus:</strong> Uusi vesieristys ja rakenteellinen korjaus v. 2026.
-                                Pakkasrapautuminen lähes pysähtyy (95% vähenemä),
+                                <strong>C &mdash; T&auml;yskorjaus:</strong> Uusi vesieristys ja rakenteellinen korjaus v. 2026.
+                                Pakkasrapautuminen l&auml;hes pys&auml;htyy (95% v&auml;henem&auml;),
                                 karbonatisaatiokerroin laskee 70%.
-                                Hankesuunnitelman mukaan vaahterat kaadetaan, vaikka korjaus on toteutettavissa myös ne säilyttäen.
+                                Hankesuunnitelman mukaan vaahterat kaadetaan.<br>
+                                <strong>D &mdash; T&auml;yskorjaus (puut s&auml;ilytt&auml;en):</strong> Sama kuin C, mutta pihakannen
+                                vaahterat s&auml;ilytet&auml;&auml;n. Puualue (~156&nbsp;m&sup2;) ohitetaan, mik&auml; pienent&auml;&auml;
+                                kustannusta ~10&nbsp;%. Puuston hiilinielu jatkuu.
                             </p>
                         </div>
 
